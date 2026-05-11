@@ -1,0 +1,196 @@
+Proyecto Final: Ingenier´ıa Web y M´ovil - ICI
+4247-01 y ICI 4247 -02
+1.
+Informaci´on
+Deben usar para el frontend el framework ionic con react y para el
+backend node.js, Flask, Djando, FastAPI, etc.
+El software deber´ıa ser implementado en su totalidad por el grupo de
+trabajo.
+El problema a resolver deber ser propuesto y modelado por los inte-
+grantes del grupo.
+El grupo deber´a estar conformado m´aximo de 4 estudiantes. Los estu-
+diantes deber´an inscribir sus proyectos en el siguiente link Formulario
+de Google, el cual tendr´a como fecha l´ımite 22 de Marzo del 2026
+El proyecto deber´a ser gestionado a trav´es de GitHub, manteniendo un
+repositorio p´ublico con el c´odigo fuente del proyecto. Tambi´en deber´an
+hacer uso de readme.md
+2.
+Restricciones
+Los proyectos no se pueden repetir m´as de 3 veces. En caso de que
+exista un tema igual o similar, uno de los grupos deber´a cambiar su
+tema, d´andose prioridad al grupo que inscribi´o primero la propuesta.
+El frontend deber´a ser desarrollado utilizando el framework Ionic con
+React.
+El backend deber´a ser desarrollado aplicando APIs RESTful con cone-
+xi´on a base de datos relacional, usando Nodej.js con express o Flask
+(Python).
+Todos los integrantes del grupo deben pertenecer al mismo paralelo.
+1
+Tanto el repositorio como el proyecto Github deber´an ser p´ublicos o en
+su defecto, deber´an proporcionar acceso a la profesor/a y al/la ayudante
+de la asignatura. Si no es p´ublico tendr´a una penalizaci´on de un punto
+tomando en escala de 1 a 7.
+3.
+Gesti´on del Proyecto
+El proyecto deber´a ser gestionado a trav´es de GitHub, manteniendo un
+repositorio p´ublico con el c´odigo fuente del proyecto y manejo correcto de
+un archivo readme.md. Las funcionalidades que deber´an ser usadas Issues,
+Discussions y gestionando a trav´es de un tablero de trabajo en GitHub
+Projects.
+Los conceptos relacionados al uso de GitHub ser´an cubiertos durante las
+ayudant´ıas del curso, y se les har´a entrega de material de apoyo accesible a
+trav´es del Aula Virtual de la asignatura.
+4.
+Entregas del proyecto
+El proyecto tendr´a dos (2) entregables (Entrega Parcial 1 y Entrega Par-
+cial 2), y una entrega ﬁnal, la que deber´a ser presentada y defendida. Re-
+quisitos Todas las entregas deben cumplir con los siguientes requisitos.
+Cada entrega debe ser respaldada en GitHub a trav´es de un commit
+el que debe ser subido (push) al repositorio del proyecto antes de la
+fecha y hora l´ımite de entrega.
+Cada entrega debe contar con un README.md que contenga la des-
+cripci´on de la entrega, los integrantes y los pasos para ejecutar el pro-
+yecto.
+En el Aula Virtual de la asignatura se debe subir un archivo readme.txt
+que contenga la url del repositorio.
+Se deben incluir otros archivos como diagramas, presentaciones o cual-
+quier otro material que considere necesario para la entrega, dentro de
+una carpeta llamada otros dentro de la ra´ız del proyecto.
+Se debe mantener el c´odigo ordenado, bien documentado, y con los
+issues, pull request y ramas (branches) bien gestionadas.
+2
+5.
+Entregas Parciales
+1.
+Entrega Parcial 1: Dise˜no y Estructura inicial
+Objetivo: Deﬁnir el dise˜no de la aplicaci´on y construir la estructura
+del frontend en Ionic+ React.
+EP 1.1: Deﬁnici´on de al menos 7 requerimientos funcionales y al
+menos 3 no funcionales (rendimiento, seguridad, usabilidad). Estas
+funcionalidades no pueden ser repetitivas. Estas funcionalidades
+est´an fuera de inicio se sesi´on o registrarse ya que deben estar
+inmersas en la propuesta. Dentro de las funcionalidades deben
+considerar dos tipos de roles (ejemplo: usuario y admin).
+EP 1.2: Justiﬁcaci´on del problema y an´alisis del usuario objetivo.
+EP 1.3: Bocetos de UI/UX y prototipo en Figma de al me-
+nos 7 mockups o pantallas distintas, cada una correspondiente
+a una funcionalidad previamente deﬁnida en los requerimientos
+del proyecto. Cada pantalla deber´a presentar un dise˜no diferen-
+ciado, coherente con el ﬂujo de navegaci´on y la jerarqu´ıa de in-
+formaci´on. Las interfaces deber´as ser prototipadas considerando
+expl´ıcitamente: versi´on m´ovil y web. El dise˜no deber´a evidenciar
+distribuci´on de contenido, componentes de navegaci´on (por ejem-
+plo: men´u lateral en web, barra inferior en m´ovil), jerarqu´ıa visual
+y densidad de la informaci´on. Se deber´a Incluir en los mockups
+dos formularios relacionados al inicio de sesi´on de usuarios y re-
+gistro, considerando los campos: Nombre de usuario, RUT, Co-
+rreo Electr´onico, Regi´on, Comuna, Contrase˜na, Conﬁrmaci´on de
+Contrase˜na y aceptaci´on de t´erminos y condiciones. Considerando
+validaciones visuales y dise˜no centrado en el usuario.
+EP 1.4: Deﬁnici´on de Arquitectura de Navegaci´on y Experiencia
+del Usuario. El equipo deber´a deﬁnir la arquitectura de navega-
+ci´on de la aplicaci´on, describiendo la estructura de rutas, jerar-
+qu´ıa de vistas, y ﬂujo de interacci´on entre pantallas. La entrega
+deber´a incluir: (a) Rutas principales y secundarias; (b) Relaciones
+jer´arquicas entre vistas; (c) Flujo de navegaci´on entre funcionali-
+dades; (d) diferenciaci´on de acceso seg´un roles (por ejemplo: usua-
+rio /administrador); (e) ﬂujo de principales tareas (task ﬂow), (f)
+puntos cr´ıticos de interacci´on; (g) coherencia de experiencia entre
+3
+dispositivos; (h) breve justiﬁcaci´on t´ecnica de las decisiones adop-
+tadas, considerando usabilidad, eﬁciencia de interacci´on, claridad
+estructural y escalabilidad de la arquitectura frontend.
+EP 1.5: Creaci´on del proyecto en Ionic con React, considerando:
+(a) Uso de react router; (b) Rutas p´ublicas y rutas protegidas; (c)
+Redirecciones (ejemplo: login obligatorio); (d) Estructura modular
+de vistas.
+EP 1.6: Dise˜no de pantallas principales e incorporando una es-
+tructura de navegaci´on funcional y coherente con la arquitectura
+previamente deﬁnida en ionic-react (al menos 4). Uso de com-
+ponentes propios de Ionic (IonPage, IonHeader, IonContent, Ion-
+Tabs, IonMenu, etc). Separaci´on estructural del c´odigo en carpetas
+(pages, components, routes, services).
+Entrega:
+Repositorio GitHub/GitLab con el c´odigo del frontend
+Prototipo UI/UX en Figma.
+Aplicaci´on navegable con dise˜no b´asico realizado en Ionic + React.
+Readme.md que incluya la documentaci´on t´ecnica.
+2.
+Entrega Parcial 2: Integraci´on frontend + backend y Autenticaci´on
+Objetivo: Implementar el backend en Node.js con Express, Flask u
+otro framework backend, y conectarlo con el frontend y agregar auten-
+ticaci´on.
+EP 2.1: Creaci´on del servidor en Node.js con Express o Flask
+EP 2.2: Conﬁguraci´on y modelado de la base de datos relacional.
+Deber´an incluir el dise˜no modelo relacional y la implementaci´on
+en base de datos usando PostgreSQL/ MySQL, uso de ORM (op-
+cional) y validaci´on de integridad.
+EP 2.3: Desarrollo de API REST con endpoints b´asicos (GET,
+POST, PUT/PATCH, y DELETE). Manejo adecuado de c´odigos
+HTTP y respuestas en formato JSON estructurado.
+EP 2.4: Consumo de la API REST desde Ionic con React utilizan-
+do fetch o Axios, implementando manejo de errores, interceptores
+y gesti´on de tokens JWT.
+4
+EP 2.5: Implementaci´on de autenticaci´on con JWT deber´a incluir
+(a) formulario de registro e inicio de sesi´on; (b) rutas protegias en
+frontend; (c) generaci´on y validaci´on de JWT; (d) diferenciaci´on
+por roles.
+EP 2.6: Validaci´on de usuarios y manejo de sesiones deber´a in-
+cluir: (a) validaci´on de inputs ; (b) Hash de contrase˜nas con bcrypt;
+(c) Manejo seguro de credenciales; (d) Protecci´on b´asica contra in-
+yecci´on SQL.
+EP 2.7: Pruebas funcionales, considerando (a) Pruebas en Post-
+man o Insomnia; (b) Documentaci´on de endpoints; (c) Evidencia
+de pruebas.
+Entrega:
+Backend funcional con API REST
+Autenticaci´on y manejo de usuarios
+Integraci´on frontend + backend con pruebas en Postman o Insom-
+nia.
+Repositorio actualizado o crear un nuevo repositorio para backend
+y otro para front-end.
+3.
+Entrega Final: Funcionalidades avanzadas, optimizar rendimiento y
+preparar aplicaci´on para su despliegue.
+Objetivo: Agregar funcionalidades avanzadas, optimizar rendimiento
+y preparar la aplicaci´on para su despliegue.
+EF 1: Implementaci´on de funcionalidades completas (CRUD, no-
+tiﬁcaciones, almacenamiento local) de acuerdo a los requerimien-
+tos funcionales y no funcionales deﬁnidos.
+EF 2: Mejoras en UI/UX y optimizaci´on de rendimiento.
+EF 3: Implementaci´on de seguridad avanzada en API: protecci´on
+contra inyecci´on SQL/XSS, implementaci´on CORS seguro, y en-
+criptaci´on de datos sensibles con bcrypt.
+EF 4: Optimizaci´on de consultas y respuesta eﬁciente.
+EF 5: Integraci´on con alg´un servicio externo (AWS o APIs de
+terceros).
+5
+EF 6: Despliegue con docker
+• Creaci´on de Dockerﬁle para backend y frontend y docker com-
+pose.
+• Conﬁguraci´on de docker-compose para orquestaci´on de servi-
+cios (API, base de datos, frontend).
+• Pruebas de despliegue local con Docker.
+Entrega:
+Aplicaci´on con CRUD completo, UI/UX optimizado y seguridad
+web aplicada.
+Backend seguro con validaciones y cifrado de datos.
+Documentaci´on t´ecnica del proyecto.
+6.
+Tecnolog´ıas y Herramientas
+Frontend:
+Ionic, React, TypeScript.
+Ionic Native y Capacitor.
+CSS con Tailwind o Bootstrap.
+Backend:
+Node.js con Express.js
+Flask con Python
+Bases de datos : PostgreSQL, MongoDB o MySQL
+Autenticaci´on: JWT, OAuth.
+Cloud Services: AWS, Firebase.
+Desarrollo y Despliegue:
+Git y Github/ GitLab
+Postman o Insomnia para pruebas de API
+Docker para entornos de desarrollo.
+6
