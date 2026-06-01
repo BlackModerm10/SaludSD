@@ -1,71 +1,18 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, mockCurrentUser, mockAdminUser } from '../services/mockData';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import api from './api';
 
-// ────────────────────────────────────────────
-// ClaveÚnica OpenID Connect Configuration
-// In production, these come from environment variables
-// ────────────────────────────────────────────
-export const CLAVE_UNICA_CONFIG = {
-  // Authorization endpoint (OAuth 2.0)
-  authorizeUrl: 'https://accounts.claveunica.gob.cl/openid/authorize/',
-  // Token endpoint (backend-only in production)
-  tokenUrl: 'https://accounts.claveunica.gob.cl/openid/token/',
-  // UserInfo endpoint (backend-only in production)
-  userInfoUrl: 'https://accounts.claveunica.gob.cl/openid/userinfo/',
-  // Logout endpoint
-  logoutUrl: 'https://accounts.claveunica.gob.cl/api/v1/accounts/app/logout',
-  // Client ID (will come from env in production)
-  clientId: 'PLACEHOLDER_CLIENT_ID',
-  // Redirect URI (callback after ClaveÚnica auth)
-  redirectUri: 'https://saludsd.santodomingo.gob.cl/auth/callback',
-  // Scopes required by ClaveÚnica
-  scope: 'openid run name',
-  // Response type for Authorization Code Flow
-  responseType: 'code',
-};
-
-// Generate CSRF state token
-export function generateStateToken(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+export interface User {
+  id: string;
+  nombre: string;
+  rut: string;
+  email: string;
+  region?: string;
+  comuna?: string;
+  role: 'paciente' | 'admin';
+  avatar?: string;
 }
 
-// Build the ClaveÚnica authorization URL
-export function buildClaveUnicaUrl(): string {
-  const state = generateStateToken();
-  // In production, store state in sessionStorage for CSRF validation
-  sessionStorage.setItem('claveunica_state', state);
-
-  const params = new URLSearchParams({
-    client_id: CLAVE_UNICA_CONFIG.clientId,
-    response_type: CLAVE_UNICA_CONFIG.responseType,
-    scope: CLAVE_UNICA_CONFIG.scope,
-    redirect_uri: CLAVE_UNICA_CONFIG.redirectUri,
-    state: state,
-  });
-
-  return `${CLAVE_UNICA_CONFIG.authorizeUrl}?${params.toString()}`;
-}
-
-// Build the ClaveÚnica logout URL
-export function buildLogoutUrl(): string {
-  const redirectUri = encodeURIComponent(window.location.origin);
-  return `${CLAVE_UNICA_CONFIG.logoutUrl}?redirect=${redirectUri}`;
-}
-
-// ────────────────────────────────────────────
-// User roles for staff who can be both patient and funcionario
-// ────────────────────────────────────────────
 export type ActiveRole = 'paciente' | 'admin';
-
-// List of RUTs that are registered as staff (doctor, admin, funcionario)
-// In production, this comes from the database
-export const STAFF_RUTS = [
-  '9.876.543-2',   // Dr. Carlos Muñoz
-  '11.111.111-1',  // Dra. Patricia Herrera
-  '22.222.222-2',  // Kin. Roberto Araya
-];
 
 interface AuthContextType {
   user: User | null;
@@ -73,11 +20,13 @@ interface AuthContextType {
   isStaff: boolean;
   activeRole: ActiveRole;
   showRoleSelector: boolean;
-  // ClaveÚnica flow
-  initiateClaveUnica: () => void;
-  handleClaveUnicaCallback: (code: string, state: string) => void;
-  // Mock login for prototype demo
-  loginWithClaveUnicaMock: () => void;
+  loading: boolean;
+  error: string | null;
+  // Auth actions
+  initiateClaveUnica: (isAdminFlow?: boolean) => void;
+  handleClaveUnicaCallback: (code: string, state: string) => Promise<void>;
+  loginWithCredentials: (rut: string, password: string) => Promise<void>;
+  registerPatient: (form: any) => Promise<void>;
   // Role management
   selectRole: (role: ActiveRole) => void;
   setShowRoleSelector: (show: boolean) => void;
@@ -91,9 +40,12 @@ const AuthContext = createContext<AuthContextType>({
   isStaff: false,
   activeRole: 'paciente',
   showRoleSelector: false,
+  loading: false,
+  error: null,
   initiateClaveUnica: () => {},
-  handleClaveUnicaCallback: () => {},
-  loginWithClaveUnicaMock: () => {},
+  handleClaveUnicaCallback: async () => {},
+  loginWithCredentials: async () => {},
+  registerPatient: async () => {},
   selectRole: () => {},
   setShowRoleSelector: () => {},
   logout: () => {},
@@ -105,92 +57,161 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [activeRole, setActiveRole] = useState<ActiveRole>('paciente');
   const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = !!user;
-  // Check if the logged-in user is a staff member (doctor, admin, funcionario)
-  const isStaff = user ? STAFF_RUTS.includes(user.rut) || user.role === 'admin' : false;
+  // En SaludSD, si el rol del usuario retornado es admin, es funcionario.
+  const isStaff = user ? user.role === 'admin' : false;
 
-  /**
-   * Initiate ClaveÚnica OAuth flow
-   * In production: redirects to ClaveÚnica login
-   * In prototype: mocks the flow
-   */
-  const initiateClaveUnica = () => {
-    // In production, this would redirect:
-    // window.location.href = buildClaveUnicaUrl();
+  // Cargar usuario persistido al arrancar
+  useEffect(() => {
+    const fetchMe = async () => {
+      const token = localStorage.getItem('saludsd_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-    // For prototype, simulate the flow
-    loginWithClaveUnicaMock();
-  };
-
-  /**
-   * Handle callback from ClaveÚnica after authorization
-   * In production: validates state, exchanges code for token, gets user info
-   */
-  const handleClaveUnicaCallback = (_code: string, _state: string) => {
-    // Production flow:
-    // 1. Validate state matches sessionStorage('claveunica_state')
-    // 2. POST to backend with code → backend exchanges for access_token
-    // 3. Backend calls /openid/userinfo/ with access_token
-    // 4. Backend returns user data (RUN + nombre)
-    // 5. Check if RUN is in staff table → show role selector if yes
-
-    // Mock: simulate receiving user data
-    loginWithClaveUnicaMock();
-  };
-
-  /**
-   * Mock ClaveÚnica login for prototype demonstration.
-   * Simulates what happens after a successful ClaveÚnica auth:
-   * - User identity is obtained (RUN + nombre)
-   * - System checks if user is staff → shows role selector
-   * - Otherwise, logs in directly as patient
-   */
-  const loginWithClaveUnicaMock = () => {
-    // Simulate: by default, user identified as a staff member for demo
-    // This way we can show the role selector
-    const authenticatedUser: User = {
-      ...mockAdminUser,
-      // ClaveÚnica returns: RolUnico.numero (RUN) and name
+      try {
+        const res = await api.get('/auth/me');
+        const loggedUser = res.data.user;
+        setUser(loggedUser);
+        
+        // Cargar rol guardado o por defecto
+        const savedRole = localStorage.getItem('saludsd_active_role') as ActiveRole;
+        if (savedRole) {
+          setActiveRole(savedRole);
+        } else {
+          setActiveRole(loggedUser.role);
+        }
+      } catch (err) {
+        console.error('Error al restaurar sesión:', err);
+        localStorage.removeItem('saludsd_token');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setUser(authenticatedUser);
+    fetchMe();
+  }, []);
 
-    // Check if user is staff → show role selector
-    if (STAFF_RUTS.includes(authenticatedUser.rut) || authenticatedUser.role === 'admin') {
-      setShowRoleSelector(true);
-    } else {
-      setActiveRole('paciente');
-      setShowRoleSelector(false);
+  /**
+   * Inicia el flujo de ClaveÚnica.
+   * Redirige al callback simulado.
+   * Si isAdminFlow es true, simulamos que se autentica un funcionario (Dr. Carlos Muñoz).
+   */
+  const initiateClaveUnica = (isAdminFlow: boolean = false) => {
+    setError(null);
+    setLoading(true);
+    
+    // Simular el redireccionamiento de ClaveÚnica al callback de nuestra app
+    const code = isAdminFlow ? 'mock_admin_code' : 'mock_patient_code';
+    const state = isAdminFlow ? 'mock_admin_state' : 'mock_patient_state';
+    
+    // Redirigir a nuestro Callback
+    window.location.href = `/auth/callback?code=${code}&state=${state}`;
+  };
+
+  /**
+   * Procesa el código devuelto por ClaveÚnica y obtiene el JWT firmado por el backend
+   */
+  const handleClaveUnicaCallback = async (code: string, state: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/claveunica/callback', { code, state });
+      const { token, user: loggedUser } = res.data;
+
+      localStorage.setItem('saludsd_token', token);
+      setUser(loggedUser);
+
+      // Si es funcionario, mostramos el selector de rol
+      if (loggedUser.role === 'admin') {
+        setShowRoleSelector(true);
+      } else {
+        setActiveRole('paciente');
+        localStorage.setItem('saludsd_active_role', 'paciente');
+        setShowRoleSelector(false);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || 'Error al autenticar con ClaveÚnica.');
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
   /**
-   * Select active role (for staff who have dual access)
+   * Inicio de sesión local con RUT y Contraseña
+   */
+  const loginWithCredentials = async (rut: string, password: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/login', { rut, password });
+      const { token, user: loggedUser } = res.data;
+
+      localStorage.setItem('saludsd_token', token);
+      setUser(loggedUser);
+
+      if (loggedUser.role === 'admin') {
+        setShowRoleSelector(true);
+      } else {
+        setActiveRole('paciente');
+        localStorage.setItem('saludsd_active_role', 'paciente');
+        setShowRoleSelector(false);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Credenciales inválidas.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Registro local de paciente
+   */
+  const registerPatient = async (form: any) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/register', form);
+      const { token, user: loggedUser } = res.data;
+
+      localStorage.setItem('saludsd_token', token);
+      setUser(loggedUser);
+      setActiveRole('paciente');
+      localStorage.setItem('saludsd_active_role', 'paciente');
+      setShowRoleSelector(false);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error al registrar paciente.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Seleccionar rol (para funcionarios con acceso dual)
    */
   const selectRole = (role: ActiveRole) => {
     setActiveRole(role);
+    localStorage.setItem('saludsd_active_role', role);
     setShowRoleSelector(false);
-
-    if (role === 'paciente') {
-      // Even though they're staff, they view as patient
-      setUser(prev => prev ? { ...prev, role: 'paciente' } : null);
-    } else {
-      setUser(prev => prev ? { ...prev, role: 'admin' } : null);
-    }
   };
 
   /**
-   * Logout: close local session + ClaveÚnica session
+   * Cerrar Sesión local y limpiar localStorage
    */
   const logout = () => {
     setUser(null);
     setActiveRole('paciente');
     setShowRoleSelector(false);
-    sessionStorage.removeItem('claveunica_state');
-
-    // In production: redirect to ClaveÚnica logout endpoint
-    // window.location.href = buildLogoutUrl();
+    localStorage.removeItem('saludsd_token');
+    localStorage.removeItem('saludsd_active_role');
   };
 
   return (
@@ -200,9 +221,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isStaff,
       activeRole,
       showRoleSelector,
+      loading,
+      error,
       initiateClaveUnica,
       handleClaveUnicaCallback,
-      loginWithClaveUnicaMock,
+      loginWithCredentials,
+      registerPatient,
       selectRole,
       setShowRoleSelector,
       logout,

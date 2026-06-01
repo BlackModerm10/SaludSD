@@ -14,8 +14,11 @@
 6. [Arquitectura de Navegación (EP 1.4)](#ep-14-arquitectura-de-navegación-y-experiencia-del-usuario)
 7. [Estructura del Proyecto Ionic+React (EP 1.5)](#ep-15-proyecto-ionic--react)
 8. [Pantallas Implementadas (EP 1.6)](#ep-16-pantallas-principales-implementadas)
-9. [Instalación y Ejecución](#instalación-y-ejecución)
-10. [Tecnologías](#tecnologías)
+9. [Modelo Relacional y Base de Datos (EP 2.2)](#ep-22-modelo-relacional-y-base-de-datos)
+10. [Documentación de la API (EP 2.1, 2.3, 2.7)](#ep-23-api-restful)
+11. [Seguridad y Manejo de Sesión (EP 2.5, 2.6)](#ep-26-seguridad-y-manejo-de-sesiones)
+12. [Instalación y Ejecución](#instalación-y-ejecución)
+13. [Tecnologías](#tecnologías)
 
 ---
 
@@ -386,40 +389,119 @@ src/
 └── theme/          → Estilos y variables CSS
 ```
 
+
+---
+
+## EP 2.2: Modelo Relacional y Base de Datos
+
+El sistema de SaludSD utiliza una base de datos relacional para garantizar la integridad, consistencia y trazabilidad de la información de salud comunal.
+
+### Diagrama del Modelo Relacional
+El diagrama físico del modelo relacional se encuentra disponible en la carpeta `/otros/diagramas/modelo_relacional.png` y se detalla a continuación:
+
+![Modelo Relacional de Base de Datos](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/otros/diagramas/modelo_relacional.png)
+
+### Tablas y Relaciones DDL (`schema.sql`)
+1. **`usuarios`**: Almacena el perfil (pacientes y funcionarios) con restricciones de RUT único y email único. Las contraseñas se almacenan cifradas (`password_hash`).
+2. **`centros_salud`**: Registra los CESFAM y Postas rurales con su dirección, capacidad de atención y tiempos estimados promedio.
+3. **`especialidades_centro`**: Tabla intermedia que vincula los centros con sus especialidades médicas específicas (Relación N:M resuelta).
+4. **`lista_espera`**: Controla las derivaciones médicas con llaves foráneas a `usuarios` y `centros_salud`. Registra fecha de solicitud, prioridad y posición calculada dinámicamente.
+5. **`citas`**: Registra la agenda de horas programadas o confirmadas de los pacientes.
+6. **`notificaciones`**: Almacena el centro de notificaciones de cada usuario, marcando el flag de leída/no leída.
+
+---
+
+## EP 2.3: API RESTful
+
+El servidor backend está desarrollado en **Node.js + Express** con **TypeScript**. Expone una interfaz RESTful que maneja formatos JSON para las solicitudes y respuestas de datos e implementa códigos de estado HTTP estándar (200, 201, 400, 401, 403, 404, 500).
+
+### Detalle de Endpoints Disponibles
+
+#### 🔐 Autenticación y Cuentas (`/api/auth`)
+* `POST /api/auth/register` - Registro local de pacientes (valida RUT, encripta clave, genera JWT).
+* `POST /api/auth/login` - Inicio de sesión local (RUT + Contraseña, genera JWT).
+* `POST /api/auth/claveunica/callback` - Simulación del callback OIDC de ClaveÚnica para testing rápido.
+* `GET /api/auth/me` - [Protegido] Retorna los datos del usuario en sesión extraídos del token JWT.
+
+#### 📋 Listas de Espera (`/api/waitlist`)
+* `GET /api/waitlist` - [Protegido] Retorna la lista de espera (solo la propia para Pacientes, todas para Funcionarios SOME con filtros).
+* `POST /api/waitlist` - [Protegido] Crea una derivación/solicitud y calcula la posición en cola de forma dinámica.
+* `PUT /api/waitlist/:id` - [Protegido, Solo Funcionario] Actualiza prioridad, estado o centro de derivación.
+* `DELETE /api/waitlist/:id` - [Protegido, Solo Funcionario] Elimina una derivación de la lista.
+
+#### 🏥 Directorio de Salud (`/api/health-centers`)
+* `GET /api/health-centers` - Retorna los centros activos de la comuna, especialidades ofertadas y ocupación.
+
+#### 📅 Citas Médicas (`/api/appointments`)
+* `GET /api/appointments` - [Protegido] Historial de citas agendadas, finalizadas y canceladas del paciente.
+
+#### 🔔 Notificaciones (`/api/notifications`)
+* `GET /api/notifications` - [Protegido] Alertas de avance en cola de espera y recordatorios.
+* `PUT /api/notifications/:id/read` - [Protegido] Marca la notificación como leída en la base de datos.
+
+#### 📊 Estadísticas y Reportes (`/api/stats`)
+* `GET /api/stats` - Retorna indicadores clave de rendimiento (KPIs, pacientes por especialidad, saturación por centro) para el dashboard del funcionario de SOME.
+
+---
+
+## EP 2.6: Seguridad y Manejo de Sesiones
+
+Para cumplir con las restricciones técnicas y normativas de seguridad, se incorporaron las siguientes prácticas:
+
+1. **Hash de Contraseñas (Bcrypt):** Las claves se encriptan con `bcryptjs` usando un factor de costo (salt) de 10. Nunca se guardan contraseñas en texto plano.
+2. **Consultas Parametrizadas (Inyección SQL):** Se rechaza la concatenación de strings en sentencias SQL. Todas las consultas al pool de conexiones utilizan placeholders para separar estrictamente el código del dato.
+3. **Mapeo de Tokens JWT:** El backend firma tokens de sesión con una firma robusta de 256 bits (`jsonwebtoken`). El frontend (`api.ts`) posee un **Interceptor de Peticiones** para inyectar la cabecera `Authorization: Bearer <token>` y un **Interceptor de Respuestas** para capturar códigos `401` y purgar la sesión automáticamente ante tokens vencidos.
+4. **Validación del Algoritmo del RUT:** Tanto en el formulario web como en el backend se procesa el dígito verificador bajo el algoritmo chileno de Módulo 11, rechazando el ingreso o registro ante RUTs inconsistentes.
+
 ---
 
 ## Instalación y Ejecución
 
 ### Prerrequisitos
+* [Node.js](https://nodejs.org/) v20 o superior
+* MySQL 8.0 activo en tu máquina local
 
-- [Node.js](https://nodejs.org/) v18 o superior
-- npm v9 o superior
+### 1. Configuración de Variables de Entorno
+Crea o edita el archivo `backend/.env` con la configuración de tu entorno:
+```env
+PORT=5000
+DB_USER=root
+DB_PASSWORD=tu_contraseña_root_mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=saludsd
+JWT_SECRET=saludsd_secret_key_for_jwt_2026_primary_health_sec!
+JWT_EXPIRES_IN=7d
+```
 
-### Pasos
-
+### 2. Inicialización de la Base de Datos (Semilla)
+Ejecuta el script de semilla para crear la base de datos, las tablas y poblar las credenciales de prueba en MySQL:
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/<usuario>/saludsd.git
-cd saludsd
-
-# 2. Instalar dependencias
+cd backend
 npm install
+npm run seed
+```
 
-# 3. Ejecutar en modo desarrollo
+### 3. Iniciar el Servidor de API (Backend)
+Inicia el servidor en modo desarrollo (correrá en http://localhost:5000):
+```bash
 npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:5173/`
+### 4. Iniciar la Aplicación Frontend
+En otra ventana de terminal en la raíz del proyecto, instala dependencias e inicia el frontend (correrá en http://localhost:5173/):
+```bash
+npm install
+npm run dev
+```
 
-### Acceso de demostración
+### Credenciales de Demostración Sembradas
+Puedes acceder e interactuar con la base de datos en tiempo real usando:
 
-| Acción | Cómo |
-|--------|------|
-| Entrar como **Paciente** | Clic en "Iniciar sesión con ClaveÚnica" → Selector de rol → *Paciente* |
-| Entrar como **Funcionario** | Clic en "Iniciar sesión con ClaveÚnica" → Selector de rol → *Funcionario* |
-| Cambiar de rol | Botón **↔ Paciente/Funcionario** en la navbar |
-
-> **Nota:** En esta versión prototipo, la autenticación con ClaveÚnica es simulada. En producción, el botón redirige al portal oficial `accounts.claveunica.gob.cl`.
+| Perfil | RUT | Contraseña |
+|---|---|---|
+| **Paciente** (María González) | `12.345.678-5` | `123456` |
+| **Funcionario** (Dr. Carlos Muñoz) | `9.876.543-3` | `123456` |
 
 ---
 
@@ -428,17 +510,24 @@ La aplicación estará disponible en `http://localhost:5173/`
 | Capa | Tecnología | Versión |
 |------|-----------|---------|
 | Frontend | Ionic + React | 8.5 / 19.0 |
-| Lenguaje | TypeScript | 5.9 |
+| Backend | Node.js + Express | 20.x / 4.19 |
+| Base de Datos | MySQL (MySQL80 Service) | 8.0 |
+| Lenguaje | TypeScript (ESM) | 5.4 / 5.9 |
+| Autenticación | JSON Web Tokens (JWT) / ClaveÚnica Sim. | OAuth 2.0 |
+| Cifrado | Bcrypt | 2.4 |
+| Cliente HTTP | Axios con Interceptores | 1.16 |
 | Build Tool | Vite | 5.x |
-| Router | React Router | 5.3.4 |
-| Estilos | CSS + Framework Gobierno Chile | — |
-| Tipografía | Google Fonts (Roboto, Roboto Slab) | — |
-| Autenticación | ClaveÚnica (OpenID Connect) | OAuth 2.0 |
-| Capacitor | Capacitor Core | 8.3 |
 | Testing | Cypress + Vitest | 13.x / 0.34 |
 
 ---
 
-## Licencia
+## Entregables Adicionales (Carpeta `/otros`)
+Dentro de la carpeta `otros/` en la raíz del proyecto se incluyen los siguientes recursos para la evaluación:
+* 📂 **`diagramas/modelo_relacional.png`**: Diagrama de la base de datos relacional MySQL.
+* 📄 **`evidencia_pruebas.md`**: Detalle de las respuestas JSON, estructuras de datos y políticas de seguridad aplicadas.
+* 📄 **`SaludSD_API_Collection.postman_collection.json`**: Colección de Postman lista para importar y ejecutar pruebas funcionales de todos los endpoints.
 
+---
+
+## Licencia
 Proyecto académico — Universidad. Todos los derechos reservados.

@@ -1,24 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { IonPage, IonContent } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import GobNavbar from '../components/GobNavbar';
 import GobFooter from '../components/GobFooter';
 import { useAuth } from '../services/AuthContext';
+import { formatRut, validateRut } from '../services/mockData';
 
 const Login: React.FC = () => {
   const history = useHistory();
-  const { initiateClaveUnica, isAuthenticated, showRoleSelector, selectRole } = useAuth();
+  const { initiateClaveUnica, isAuthenticated, showRoleSelector, selectRole, loginWithCredentials } = useAuth();
+
+  // Local Form state
+  const [rut, setRut] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loadingLocal, setLoadingLocal] = useState(false);
 
   // If already authenticated and role selector is visible, show it
-  // If authenticated without role selector, redirect
-  React.useEffect(() => {
+  // If authenticated without role selector, redirect to dashboard
+  useEffect(() => {
     if (isAuthenticated && !showRoleSelector) {
-      // Already selected role, redirect
+      history.push('/paciente/dashboard');
     }
-  }, [isAuthenticated, showRoleSelector]);
+  }, [isAuthenticated, showRoleSelector, history]);
 
-  const handleClaveUnicaClick = () => {
-    initiateClaveUnica();
+  const handleClaveUnicaClick = (isAdmin: boolean) => {
+    initiateClaveUnica(isAdmin);
   };
 
   const handleSelectRole = (role: 'paciente' | 'admin') => {
@@ -30,12 +37,44 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatRut(e.target.value);
+    setRut(formatted);
+    setErrorMsg(null);
+  };
+
+  const handleLocalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+
+    if (!rut.trim() || !password.trim()) {
+      setErrorMsg('RUT y contraseña son obligatorios.');
+      return;
+    }
+
+    if (!validateRut(rut)) {
+      setErrorMsg('El RUT ingresado no es válido.');
+      return;
+    }
+
+    setLoadingLocal(true);
+    try {
+      await loginWithCredentials(rut, password);
+      // Success will trigger useEffect for redirect or role selection
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al iniciar sesión. Verifica tus credenciales.');
+    } finally {
+      setLoadingLocal(false);
+    }
+  };
+
   return (
     <IonPage>
       <IonContent>
         <GobNavbar />
 
-        {/* Role Selector Modal (shown after ClaveÚnica auth for staff) */}
+        {/* Role Selector Modal (shown after ClaveÚnica/Credentials auth for staff) */}
         {showRoleSelector && (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -75,7 +114,7 @@ const Login: React.FC = () => {
                   Identidad verificada
                 </h2>
                 <p style={{ color: '#888', fontSize: '0.9rem', margin: 0 }}>
-                  Su identidad fue verificada exitosamente con ClaveÚnica.
+                  Su identidad fue verificada exitosamente.
                   <br />Seleccione cómo desea acceder al sistema:
                 </p>
               </div>
@@ -219,64 +258,71 @@ const Login: React.FC = () => {
               <p className="subtitle">Municipalidad de Santo Domingo</p>
             </div>
 
-            {/* Description */}
-            <p style={{
-              textAlign: 'center',
-              fontSize: '0.9rem',
-              color: '#666',
-              lineHeight: 1.6,
-              marginBottom: '2rem',
-            }}>
-              Accede al Sistema de Gestión de Listas de Espera y Tiempos de Atención 
-              utilizando tu <strong>ClaveÚnica</strong>.
-            </p>
+            {errorMsg && (
+              <div style={{
+                background: '#f8d7da', color: '#721c24', border: '1px solid #f5c6cb',
+                padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem',
+                fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                <span className="material-icons-outlined" style={{ fontSize: '1.2rem' }}>error_outline</span>
+                <span>{errorMsg}</span>
+              </div>
+            )}
 
             {/* ──────────────────────────────────────────── */}
-            {/* BOTÓN OFICIAL CLAVE ÚNICA */}
-            {/* Diseño basado en los lineamientos oficiales */}
-            {/* https://wikiguias.digital.gob.cl/guias/BotónCU */}
+            {/* FORMULARIO DE ACCESO LOCAL CON JWT */}
             {/* ──────────────────────────────────────────── */}
-            <button
-              id="btn-claveunica"
-              onClick={handleClaveUnicaClick}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                width: '100%',
-                padding: '14px 24px',
-                background: '#0F69B4',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                fontWeight: 600,
-                fontFamily: "'Roboto', sans-serif",
-                cursor: 'pointer',
-                transition: 'background 0.2s ease, transform 0.1s ease',
-                marginBottom: '1.5rem',
-                letterSpacing: '0.3px',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = '#0C5A9E';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = '#0F69B4';
-              }}
-              onMouseDown={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = 'scale(0.98)';
-              }}
-              onMouseUp={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-              }}
-            >
-              {/* ClaveÚnica Key Icon (SVG oficial) */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12.65 10C11.83 7.67 9.61 6 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C9.61 18 11.83 16.33 12.65 14H17V18H21V14H23V10H12.65ZM7 14C5.9 14 5 13.1 5 12C5 10.9 5.9 10 7 10C8.1 10 9 10.9 9 12C9 13.1 8.1 14 7 14Z" fill="white"/>
-              </svg>
-              Iniciar sesión con ClaveÚnica
-            </button>
+            <form onSubmit={handleLocalSubmit} style={{ marginBottom: '1.5rem' }}>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label htmlFor="loginRut" style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--gob-tertiary)' }}>RUT</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="loginRut"
+                  placeholder="Ej: 12.345.678-9"
+                  value={rut}
+                  onChange={handleRutChange}
+                  maxLength={12}
+                  style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label htmlFor="loginPassword" style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--gob-tertiary)' }}>Contraseña</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="loginPassword"
+                  placeholder="Ingrese su contraseña"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setErrorMsg(null); }}
+                  style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn-gob-primary"
+                disabled={loadingLocal}
+                style={{
+                  width: '100%', padding: '12px', background: 'var(--gob-primary)',
+                  color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 600,
+                  cursor: 'pointer', transition: 'background 0.2s'
+                }}
+              >
+                {loadingLocal ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              </button>
+            </form>
+
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <p style={{ fontSize: '0.88rem', color: '#888', margin: 0 }}>
+                ¿No tienes una cuenta?{' '}
+                <a href="#" onClick={(e) => { e.preventDefault(); history.push('/register'); }}
+                  style={{ color: 'var(--gob-primary)', fontWeight: 600 }}>
+                  Regístrate aquí
+                </a>
+              </p>
+            </div>
 
             {/* Divider */}
             <div style={{
@@ -287,75 +333,68 @@ const Login: React.FC = () => {
             }}>
               <div style={{ flex: 1, height: 1, background: '#dee2e6' }} />
               <span style={{ fontSize: '0.78rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Información
+                O Accede Con
               </span>
               <div style={{ flex: 1, height: 1, background: '#dee2e6' }} />
+            </div>
+
+            {/* ──────────────────────────────────────────── */}
+            {/* BOTÓN OFICIAL CLAVE ÚNICA */}
+            {/* ──────────────────────────────────────────── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
+              <button
+                id="btn-claveunica-patient"
+                onClick={() => handleClaveUnicaClick(false)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+                  width: '100%', padding: '12px 24px', background: '#0F69B4', color: '#FFFFFF',
+                  border: 'none', borderRadius: '4px', fontSize: '0.92rem', fontWeight: 600,
+                  fontFamily: "'Roboto', sans-serif", cursor: 'pointer', transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#0C5A9E'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#0F69B4'; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.65 10C11.83 7.67 9.61 6 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C9.61 18 11.83 16.33 12.65 14H17V18H21V14H23V10H12.65ZM7 14C5.9 14 5 13.1 5 12C5 10.9 5.9 10 7 10C8.1 10 9 10.9 9 12C9 13.1 8.1 14 7 14Z" fill="white"/>
+                </svg>
+                ClaveÚnica (Paciente de prueba)
+              </button>
+
+              <button
+                id="btn-claveunica-admin"
+                onClick={() => handleClaveUnicaClick(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+                  width: '100%', padding: '12px 24px', background: '#0A132D', color: '#FFFFFF',
+                  border: 'none', borderRadius: '4px', fontSize: '0.92rem', fontWeight: 600,
+                  fontFamily: "'Roboto', sans-serif", cursor: 'pointer', transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#1a2540'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#0A132D'; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.65 10C11.83 7.67 9.61 6 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C9.61 18 11.83 16.33 12.65 14H17V18H21V14H23V10H12.65ZM7 14C5.9 14 5 13.1 5 12C5 10.9 5.9 10 7 10C8.1 10 9 10.9 9 12C9 13.1 8.1 14 7 14Z" fill="white"/>
+                </svg>
+                ClaveÚnica (Funcionario de prueba)
+              </button>
             </div>
 
             {/* Info cards */}
             <div style={{ marginBottom: '1.5rem' }}>
               <div style={{
                 display: 'flex', alignItems: 'flex-start', gap: '10px',
-                padding: '0.75rem 1rem',
-                background: '#f0f7ff',
-                borderRadius: 'var(--radius-sm)',
-                marginBottom: '0.5rem',
+                padding: '0.75rem 1rem', background: '#f0f7ff',
+                borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem',
               }}>
                 <span className="material-icons-outlined" style={{ color: 'var(--gob-primary)', fontSize: '1.1rem', marginTop: 2 }}>
                   vpn_key
                 </span>
                 <div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gob-tertiary)' }}>
-                    ¿Qué es ClaveÚnica?
+                    Acceso para pruebas locales
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#888', lineHeight: 1.5 }}>
-                    Es tu contraseña única para todos los servicios del Estado de Chile. 
-                    Si ya la tienes, puedes usarla para acceder a SaludSD.
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex', alignItems: 'flex-start', gap: '10px',
-                padding: '0.75rem 1rem',
-                background: '#f5f7fa',
-                borderRadius: 'var(--radius-sm)',
-                marginBottom: '0.5rem',
-              }}>
-                <span className="material-icons-outlined" style={{ color: '#28a745', fontSize: '1.1rem', marginTop: 2 }}>
-                  person_add
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gob-tertiary)' }}>
-                    ¿No tienes ClaveÚnica?
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: '#888', lineHeight: 1.5 }}>
-                    Puedes obtenerla en{' '}
-                    <a href="https://claveunica.gob.cl/" target="_blank" rel="noopener noreferrer"
-                      style={{ color: 'var(--gob-primary)', fontWeight: 600 }}>
-                      claveunica.gob.cl
-                    </a>
-                    {' '}o en cualquier oficina del Registro Civil.
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex', alignItems: 'flex-start', gap: '10px',
-                padding: '0.75rem 1rem',
-                background: '#f5f7fa',
-                borderRadius: 'var(--radius-sm)',
-              }}>
-                <span className="material-icons-outlined" style={{ color: '#6f42c1', fontSize: '1.1rem', marginTop: 2 }}>
-                  medical_services
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gob-tertiary)' }}>
-                    Profesionales de salud
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: '#888', lineHeight: 1.5 }}>
-                    Si eres médico, funcionario o profesional del área de salud, al iniciar sesión 
-                    podrás elegir entre tu vista de paciente o de funcionario.
+                    Puedes registrarte con el formulario o usar las ClaveÚnica de simulación. La contraseña común por defecto para cuentas semilla es <strong>123456</strong>.
                   </div>
                 </div>
               </div>
@@ -363,9 +402,7 @@ const Login: React.FC = () => {
 
             {/* Security footer */}
             <div style={{
-              textAlign: 'center',
-              padding: '1rem 0 0',
-              borderTop: '1px solid #eee',
+              textAlign: 'center', padding: '1rem 0 0', borderTop: '1px solid #eee',
             }}>
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -375,12 +412,11 @@ const Login: React.FC = () => {
                   lock
                 </span>
                 <span style={{ fontSize: '0.78rem', color: '#888' }}>
-                  Conexión segura con el Estado de Chile
+                  Conexión segura SSL/TLS
                 </span>
               </div>
               <p style={{ fontSize: '0.72rem', color: '#bbb', margin: 0 }}>
-                SaludSD no almacena tu contraseña. La autenticación es gestionada por 
-                ClaveÚnica del Gobierno de Chile mediante el protocolo OpenID Connect.
+                SaludSD no almacena tu contraseña de ClaveÚnica. La autenticación local utiliza cifrado irreversibles tipo bcrypt con sal y tokens firmados JWT.
               </p>
             </div>
           </div>

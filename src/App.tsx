@@ -1,11 +1,13 @@
+import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { AuthProvider } from './services/AuthContext';
+import { AuthProvider, useAuth } from './services/AuthContext';
 
 /* Pages */
 import Landing from './pages/Landing';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
 import PatientDashboard from './pages/patient/Dashboard';
 import WaitList from './pages/patient/WaitList';
@@ -41,6 +43,43 @@ setupIonicReact({
   mode: 'md', // Use Material Design for consistent look
 });
 
+// PrivateRoute component for protecting patient and admin workspaces
+const PrivateRoute: React.FC<{ component: React.ComponentType<any>; exact?: boolean; path: string; requiredRole?: 'paciente' | 'admin' }> = ({ component: Component, requiredRole, ...rest }) => {
+  const { isAuthenticated, loading, activeRole } = useAuth();
+
+  if (loading) {
+    // Show a clean loading state while restoring session from JWT token
+    return (
+      <div style={{
+        height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f7fa'
+      }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: '50%',
+          border: '3px solid #e0e0e0', borderTopColor: 'var(--gob-primary)',
+          animation: 'spin 1s linear infinite'
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  return (
+    <Route
+      {...rest}
+      render={(props) => {
+        if (!isAuthenticated) {
+          return <Redirect to="/login" />;
+        }
+        if (requiredRole && activeRole !== requiredRole) {
+          // If the user's active role doesn't match the required role, redirect to their active workspace
+          return <Redirect to={activeRole === 'admin' ? '/admin/dashboard' : '/paciente/dashboard'} />;
+        }
+        return <Component {...props} />;
+      }}
+    />
+  );
+};
+
 const App: React.FC = () => (
   <IonApp>
     <AuthProvider>
@@ -49,20 +88,21 @@ const App: React.FC = () => (
           {/* Public Routes */}
           <Route exact path="/" component={Landing} />
           <Route exact path="/login" component={Login} />
+          <Route exact path="/register" component={Register} />
           <Route exact path="/auth/callback" component={AuthCallback} />
 
-          {/* Patient Routes */}
-          <Route exact path="/paciente/dashboard" component={PatientDashboard} />
-          <Route exact path="/paciente/lista-espera" component={WaitList} />
-          <Route exact path="/paciente/solicitar-cita" component={RequestAppointment} />
-          <Route exact path="/paciente/historial" component={History} />
-          <Route exact path="/paciente/centros" component={HealthCenters} />
-          <Route exact path="/paciente/notificaciones" component={Notifications} />
+          {/* Patient Routes (Protected) */}
+          <PrivateRoute exact path="/paciente/dashboard" component={PatientDashboard} requiredRole="paciente" />
+          <PrivateRoute exact path="/paciente/lista-espera" component={WaitList} requiredRole="paciente" />
+          <PrivateRoute exact path="/paciente/solicitar-cita" component={RequestAppointment} requiredRole="paciente" />
+          <PrivateRoute exact path="/paciente/historial" component={History} requiredRole="paciente" />
+          <PrivateRoute exact path="/paciente/centros" component={HealthCenters} requiredRole="paciente" />
+          <PrivateRoute exact path="/paciente/notificaciones" component={Notifications} requiredRole="paciente" />
 
-          {/* Admin Routes */}
-          <Route exact path="/admin/dashboard" component={AdminDashboard} />
-          <Route exact path="/admin/listas" component={ManageLists} />
-          <Route exact path="/admin/estadisticas" component={Statistics} />
+          {/* Admin Routes (Protected) */}
+          <PrivateRoute exact path="/admin/dashboard" component={AdminDashboard} requiredRole="admin" />
+          <PrivateRoute exact path="/admin/listas" component={ManageLists} requiredRole="admin" />
+          <PrivateRoute exact path="/admin/estadisticas" component={Statistics} requiredRole="admin" />
 
           {/* Fallback */}
           <Route>

@@ -1,0 +1,526 @@
+{
+	"info": {
+		"_postman_id": "8b5f3a02-d961-460b-8012-a7d517c5b61a",
+		"name": "SaludSD API",
+		"description": "Colección de peticiones HTTP para probar la API RESTful de la plataforma de gestión de listas de espera SaludSD (Municipalidad de Santo Domingo). Incluye flujos de autenticación local, callback de ClaveÚnica y endpoints CRUD protegidos por JWT.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Autenticación",
+			"item": [
+				{
+					"name": "Registro Local (Paciente)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Juan Martínez López\",\n    \"rut\": \"15.678.234-3\",\n    \"email\": \"juan.martinez@email.com\",\n    \"password\": \"123456\",\n    \"region\": \"Valparaíso\",\n    \"comuna\": \"Santo Domingo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registra un nuevo paciente localmente en el sistema. Valida duplicidad de RUT e email, encripta la contraseña usando bcrypt y retorna el token JWT firmado."
+					},
+					"response": []
+				},
+				{
+					"name": "Inicio de Sesión Local",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"jwt_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rut\": \"12.345.678-5\",\n    \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Autentica a un usuario (paciente o funcionario) utilizando su RUT y contraseña local. Si las credenciales coinciden, genera y retorna el token JWT firmado. El script de pruebas almacena automáticamente este token en la variable {{jwt_token}}."
+					},
+					"response": []
+				},
+				{
+					"name": "Callback ClaveÚnica (Simulación Paciente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"jwt_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"mock_patient_code\",\n    \"state\": \"mock_patient_state\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/claveunica/callback",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"claveunica",
+								"callback"
+							]
+						},
+						"description": "Simula el intercambio seguro de código del flujo OIDC de ClaveÚnica para un paciente de prueba (María González). Retorna un token JWT válido."
+					},
+					"response": []
+				},
+				{
+					"name": "Callback ClaveÚnica (Simulación Funcionario)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"jwt_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"mock_admin_code\",\n    \"state\": \"mock_admin_state\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/claveunica/callback",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"claveunica",
+								"callback"
+							]
+						},
+						"description": "Simula el intercambio seguro de código del flujo OIDC de ClaveÚnica para un funcionario de prueba (Dr. Carlos Muñoz). Retorna un token JWT con rol administrativo."
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Perfil Actual (/me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Recupera la información del usuario autenticado a partir del token JWT enviado en las cabeceras."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lista de Espera",
+			"item": [
+				{
+					"name": "Obtener Listas de Espera",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/waitlist",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"waitlist"
+							]
+						},
+						"description": "Obtiene los registros de las listas de espera. Si el usuario es Paciente, retorna solo sus solicitudes. Si es Funcionario (Admin), retorna todas las listas de espera con búsqueda y filtros."
+					},
+					"response": []
+				},
+				{
+					"name": "Agregar a Lista de Espera",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"especialidad\": \"Cardiología\",\n    \"centro_id\": \"hc1\",\n    \"prioridad\": \"normal\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/waitlist",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"waitlist"
+							]
+						},
+						"description": "Ingresa una nueva solicitud de interconsulta a la lista de espera para el paciente autenticado. Calcula automáticamente la posición."
+					},
+					"response": []
+				},
+				{
+					"name": "Modificar Registro (Solo Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"prioridad\": \"alta\",\n    \"estado\": \"programada\",\n    \"centro_id\": \"hc1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/waitlist/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"waitlist",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "id-del-registro-waitlist",
+									"description": "ID único de la entrada en la lista de espera (UUID)"
+								}
+							]
+						},
+						"description": "Permite a un funcionario de salud actualizar los parámetros de un registro (prioridad, estado, centro de derivación) en la lista de espera."
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Registro (Solo Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/waitlist/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"waitlist",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "id-del-registro-waitlist",
+									"description": "ID de la entrada a eliminar"
+								}
+							]
+						},
+						"description": "Permite a un funcionario administrativo del SOME remover de forma permanente un registro de la lista de espera."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Centros de Salud",
+			"item": [
+				{
+					"name": "Listar Centros de Salud y Especialidades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health-centers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health-centers"
+							]
+						},
+						"description": "Retorna el listado de centros de salud (CESFAM y Postas rurales) de Santo Domingo, incluyendo sus especialidades asociadas, capacidad diaria, ocupación actual y tiempo promedio de espera."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Citas Médicas",
+			"item": [
+				{
+					"name": "Obtener Historial de Citas",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments"
+							]
+						},
+						"description": "Obtiene el listado de citas confirmadas y completadas para el paciente autenticado."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Estadísticas y Notificaciones",
+			"item": [
+				{
+					"name": "Obtener Estadísticas Globales (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"stats"
+							]
+						},
+						"description": "Calcula y retorna estadísticas agregadas en tiempo real de la base de datos MySQL para alimentar los gráficos e indicadores clave del dashboard administrativo (KPIs de demanda por especialidad, ocupación de centros de salud, etc.)."
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Notificaciones de Usuario",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							]
+						},
+						"description": "Obtiene la lista de notificaciones enviadas al usuario autenticado (actualizaciones de estado, recordatorios de citas, etc.)."
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar Notificación como Leída",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/:id/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								":id",
+								"read"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "id-de-la-notificacion"
+								}
+							]
+						},
+						"description": "Marca una notificación específica como leída (cambia el flag leida a true en base de datos)."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

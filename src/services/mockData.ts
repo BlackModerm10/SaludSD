@@ -100,7 +100,7 @@ export const ESPECIALIDADES = [
 export const mockCurrentUser: User = {
   id: 'u1',
   nombre: 'María González Pérez',
-  rut: '12.345.678-9',
+  rut: '12.345.678-5',
   email: 'maria.gonzalez@email.com',
   region: 'Valparaíso',
   comuna: 'Santo Domingo',
@@ -110,7 +110,7 @@ export const mockCurrentUser: User = {
 export const mockAdminUser: User = {
   id: 'a1',
   nombre: 'Dr. Carlos Muñoz',
-  rut: '9.876.543-2',
+  rut: '9.876.543-3',
   email: 'carlos.munoz@saludsd.cl',
   region: 'Valparaíso',
   comuna: 'Santo Domingo',
@@ -120,49 +120,49 @@ export const mockAdminUser: User = {
 export const mockWaitList: WaitListEntry[] = [
   {
     id: 'wl1', pacienteId: 'u1', pacienteNombre: 'María González Pérez',
-    pacienteRut: '12.345.678-9', especialidad: 'Cardiología',
+    pacienteRut: '12.345.678-5', especialidad: 'Cardiología',
     centroSalud: 'CESFAM Santo Domingo', fechaSolicitud: '2026-02-15',
     posicion: 12, totalEnLista: 89, tiempoEstimadoDias: 45,
     estado: 'en_espera', prioridad: 'normal'
   },
   {
     id: 'wl2', pacienteId: 'u1', pacienteNombre: 'María González Pérez',
-    pacienteRut: '12.345.678-9', especialidad: 'Oftalmología',
+    pacienteRut: '12.345.678-5', especialidad: 'Oftalmología',
     centroSalud: 'Posta Rural El Convento', fechaSolicitud: '2026-03-01',
     posicion: 34, totalEnLista: 120, tiempoEstimadoDias: 78,
     estado: 'en_espera', prioridad: 'normal'
   },
   {
     id: 'wl3', pacienteId: 'u2', pacienteNombre: 'Juan Martínez López',
-    pacienteRut: '15.678.234-K', especialidad: 'Traumatología',
+    pacienteRut: '15.678.234-3', especialidad: 'Traumatología',
     centroSalud: 'CESFAM Santo Domingo', fechaSolicitud: '2026-01-20',
     posicion: 5, totalEnLista: 67, tiempoEstimadoDias: 15,
     estado: 'en_espera', prioridad: 'alta'
   },
   {
     id: 'wl4', pacienteId: 'u3', pacienteNombre: 'Ana Rojas Vera',
-    pacienteRut: '18.234.567-3', especialidad: 'Dermatología',
+    pacienteRut: '18.234.567-9', especialidad: 'Dermatología',
     centroSalud: 'Posta Rural Bucalemu', fechaSolicitud: '2026-03-10',
     posicion: 22, totalEnLista: 45, tiempoEstimadoDias: 60,
     estado: 'en_espera', prioridad: 'normal'
   },
   {
     id: 'wl5', pacienteId: 'u4', pacienteNombre: 'Pedro Soto Díaz',
-    pacienteRut: '11.222.333-4', especialidad: 'Medicina General',
+    pacienteRut: '11.222.333-9', especialidad: 'Medicina General',
     centroSalud: 'CESFAM Santo Domingo', fechaSolicitud: '2026-04-01',
     posicion: 3, totalEnLista: 25, tiempoEstimadoDias: 7,
     estado: 'en_espera', prioridad: 'urgente'
   },
   {
     id: 'wl6', pacienteId: 'u5', pacienteNombre: 'Lucía Fernández',
-    pacienteRut: '14.555.666-7', especialidad: 'Ginecología',
+    pacienteRut: '14.555.666-K', especialidad: 'Ginecología',
     centroSalud: 'CESFAM Santo Domingo', fechaSolicitud: '2026-02-28',
     posicion: 18, totalEnLista: 55, tiempoEstimadoDias: 35,
     estado: 'en_espera', prioridad: 'alta'
   },
   {
     id: 'wl7', pacienteId: 'u6', pacienteNombre: 'Roberto Morales',
-    pacienteRut: '10.111.222-8', especialidad: 'Cardiología',
+    pacienteRut: '10.111.222-5', especialidad: 'Cardiología',
     centroSalud: 'Posta Rural San Enrique', fechaSolicitud: '2026-01-10',
     posicion: 8, totalEnLista: 89, tiempoEstimadoDias: 25,
     estado: 'programada', prioridad: 'alta'
