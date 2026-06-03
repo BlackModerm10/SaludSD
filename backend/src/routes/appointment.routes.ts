@@ -12,7 +12,7 @@ router.get('/', authMiddleware, async (req: AuthenticatedRequest, res: Response)
   try {
     const result = await query(`
       SELECT a.id, a.especialidad, a.medico, a.fecha, 
-             a.hora::text as hora, a.estado, a.notas,
+             CAST(a.hora AS CHAR) as hora, a.estado, a.notas,
              c.nombre as "centroSalud", c.id as "centroId"
       FROM citas a
       JOIN centros_salud c ON a.centro_id = c.id
