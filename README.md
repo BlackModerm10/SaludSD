@@ -455,6 +455,128 @@ Para cumplir con las restricciones técnicas y normativas de seguridad, se incor
 
 ---
 
+## EP 2.7: Pruebas Funcionales de API REST
+
+Se utilizó Postman para todas las pruebas, las cuales fueron exitosas en su totalidad.
+
+### 1. Pruebas — Autenticación (`/api/auth`)
+
+#### P-01 — Registro de nuevo paciente
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTRegistro201.png" width="400" height="400">
+
+#### P-02 — Login exitoso (Paciente)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTLoginPaciente200.png" width="400" height="400">
+
+#### P-03 — Login exitoso (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTLoginFuncionario200.png" width="400" height="400">
+
+#### P-04 — Consulta de usuario autenticado (GET /me)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETAuthUsuario200.png" width="400" height="400">
+
+### 2. Pruebas — Listas de Espera (`/api/waitlist`)
+
+#### P-05 — Consultar lista propia (Paciente)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETHistorialCitasPaciente200.png" width="400" height="400">
+
+#### P-06 — Consultar todas las listas (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETListaEsperaFuncionario200.png" width="400" height="400">
+
+#### P-07 — Crear nueva derivación (POST)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTListaEspera201.png" width="400" height="400">
+
+#### P-08 — Actualizar prioridad de derivación (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/PUTListaEspera200.png" width="400" height="400">
+
+#### P-09 — Eliminar derivación (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/DELETEListaEspera200.png" width="400" height="400">
+
+### 3. Pruebas — Centros de Salud (`/api/health-centers`)
+
+#### P-10 — Directorio de centros (ruta pública)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETCentrosSalud200.png" width="400" height="400">
+
+### 4. Pruebas — Citas Médicas (`/api/appointments`)
+
+#### P-11 — Historial de citas del paciente
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETListaEsperaPaciente200.png" width="400" height="400">
+
+### 5. Pruebas — Notificaciones (`/api/notifications`)
+
+#### P-12 — Centro de notificaciones
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETNotificaciones200.png" width="400" height="400">
+
+#### P-13 — Marcar notificación como leída
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/PUTNotificaciones200.png" width="400" height="400">
+
+### 6. Pruebas — Estadísticas (`/api/stats`)
+
+#### P-14 — Dashboard de KPIs (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETEstadisticas200.png" width="400" height="400">
+
+### 7. Pruebas de Seguridad
+
+#### S-01 — Ruta protegida sin token
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETAuthUsuario401.png" width="400" height="400">
+
+#### S-02 — Paciente intentando eliminar derivación (control de rol)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/DELETEListaEspera403.png" width="400" height="400">
+
+#### S-03 — Login con contraseña incorrecta
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTLoginPaciente401.png" width="400" height="400">
+
+#### S-04 — Registro con RUT inválido
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTRegistroPaciente400.png" width="400" height="400">
+
+#### S-05 — Paciente intentando acceder a estadísticas globales
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETEstadisticas403.png" width="400" height="400">
+
+### 8. Resumen de Pruebas
+
+| # | Prueba | Método | Endpoint | Código Esperado |
+|---|--------|--------|----------|-----------------|
+| P-01 | Registro de paciente | POST | `/api/auth/register` | 201 |
+| P-02 | Login paciente | POST | `/api/auth/login` | 200 |
+| P-03 | Login funcionario | POST | `/api/auth/login` | 200 |
+| P-04 | Usuario autenticado | GET | `/api/auth/me` | 200 |
+| P-05 | Lista propia (paciente) | GET | `/api/waitlist` | 200 |
+| P-06 | Todas las listas (funcionario) | GET | `/api/waitlist` | 200 |
+| P-07 | Nueva derivación | POST | `/api/waitlist` | 201 |
+| P-08 | Actualizar derivación | PUT | `/api/waitlist/:id` | 200 |
+| P-09 | Eliminar derivación | DELETE | `/api/waitlist/:id` | 200 |
+| P-10 | Directorio centros salud | GET | `/api/health-centers` | 200 |
+| P-11 | Historial de citas | GET | `/api/appointments` | 200 |
+| P-12 | Centro de notificaciones | GET | `/api/notifications` | 200 |
+| P-13 | Marcar notificación leída | PUT | `/api/notifications/:id/read` | 200 |
+| P-14 | KPIs y estadísticas | GET | `/api/stats` | 200 |
+| S-01 | Sin token | GET | `/api/auth/me` | 401 |
+| S-02 | Control de rol DELETE | DELETE | `/api/waitlist/:id` | 403 |
+| S-03 | Contraseña incorrecta | POST | `/api/auth/login` | 401 |
+| S-04 | RUT inválido | POST | `/api/auth/register` | 400 |
+| S-05 | Paciente accede a stats | GET | `/api/stats` | 403 |
+
+**Total pruebas:** 19 | **Exitosas:** 19 | **Fallidas:** 0
+
+---
+
 ## Instalación y Ejecución
 
 ### Prerrequisitos
