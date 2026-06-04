@@ -16,11 +16,13 @@ const STAFF_RUTS = [
 ];
 
 // Helper to validate RUT format/DV
-function validateRut(rut: string): boolean {
-  const cleaned = rut.replace(/[^0-9kK]/g, '');
+function validateRut(rut: string | number): boolean {
+  if (!rut) return false;
+  const rutStr = String(rut);
+  const cleaned = rutStr.replace(/[^0-9kK]/g, '').toUpperCase();
   if (cleaned.length < 2) return false;
   const body = cleaned.slice(0, -1);
-  const dv = cleaned.slice(-1).toUpperCase();
+  const dv = cleaned.slice(-1);
   let sum = 0;
   let mul = 2;
   for (let i = body.length - 1; i >= 0; i--) {
@@ -41,33 +43,43 @@ router.post('/register', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Todos los campos marcados con (*) son requeridos.' });
   }
 
-  if (!validateRut(rut)) {
+  const rutStr = String(rut);
+  const passStr = String(password);
+  const emailStr = String(email);
+
+  if (!validateRut(rutStr)) {
     return res.status(400).json({ error: 'El RUT ingresado no es válido.' });
   }
 
-  if (password.length < 6) {
+  // Validación de formato de email básico
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailStr)) {
+    return res.status(400).json({ error: 'El correo electrónico no es válido.' });
+  }
+
+  if (passStr.length < 6) {
     return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
   }
 
   try {
     // Verificar si el RUT ya existe
-    const rutCheck = await query('SELECT id FROM usuarios WHERE rut = $1', [rut]);
+    const rutCheck = await query('SELECT id FROM usuarios WHERE rut = $1', [rutStr]);
     if (rutCheck.rows.length > 0) {
       return res.status(400).json({ error: 'El RUT ya se encuentra registrado.' });
     }
 
     // Verificar si el email ya existe
-    const emailCheck = await query('SELECT id FROM usuarios WHERE email = $1', [email]);
+    const emailCheck = await query('SELECT id FROM usuarios WHERE email = $1', [emailStr]);
     if (emailCheck.rows.length > 0) {
       return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
     }
 
     // Cifrar la contraseña
-    const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync(password, salt);
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(passStr, salt);
 
     // Determinar rol
-    const role = STAFF_RUTS.includes(rut) ? 'admin' : 'paciente';
+    const role = STAFF_RUTS.includes(rutStr) ? 'admin' : 'paciente';
 
     // Generar UUID local
     const id = crypto.randomUUID();
@@ -76,15 +88,15 @@ router.post('/register', async (req: Request, res: Response) => {
     await query(`
       INSERT INTO usuarios (id, nombre, rut, email, password_hash, region, comuna, role)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
-    `, [id, nombre, rut, email, passwordHash, region, comuna, role]);
+    `, [id, String(nombre), rutStr, emailStr, passwordHash, String(region), String(comuna), role]);
 
-    const newUser = { id, nombre, rut, email, role };
+    const newUser = { id, nombre: String(nombre), rut: rutStr, email: emailStr, role };
 
     // Generar JWT
     const token = jwt.sign(
       { id: newUser.id, rut: newUser.rut, nombre: newUser.nombre, email: newUser.email, role: newUser.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN as any }
     );
 
     return res.status(201).json({
@@ -107,15 +119,18 @@ router.post('/login', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'RUT y contraseña son obligatorios.' });
   }
 
+  const rutStr = String(rut);
+  const passStr = String(password);
+
   try {
-    const result = await query('SELECT * FROM usuarios WHERE rut = $1', [rut]);
+    const result = await query('SELECT * FROM usuarios WHERE rut = $1', [rutStr]);
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Credenciales inválidas.' });
     }
 
     const user = result.rows[0];
 
-    const match = bcrypt.compareSync(password, user.password_hash);
+    const match = await bcrypt.compare(passStr, user.password_hash);
     if (!match) {
       return res.status(401).json({ error: 'Credenciales inválidas.' });
     }
@@ -123,7 +138,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user.id, rut: user.rut, nombre: user.nombre, email: user.email, role: user.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN as any }
     );
 
     return res.json({
@@ -150,16 +165,16 @@ router.post('/claveunica/callback', async (req: Request, res: Response) => {
 
   try {
     let rut = '12.345.678-5'; // Paciente por defecto (María González)
-    
+
     if (code === 'mock_admin_code' || state === 'mock_admin_state') {
       rut = '9.876.543-3'; // Funcionario por defecto (Carlos Muñoz)
     }
 
     let result = await query('SELECT * FROM usuarios WHERE rut = $1', [rut]);
-    
+
     if (result.rows.length === 0) {
-      const salt = bcrypt.genSaltSync(10);
-      const passwordHash = bcrypt.hashSync('123456', salt);
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('123456', salt);
       const isStaff = STAFF_RUTS.includes(rut);
       const nombre = isStaff ? 'Dr. Carlos Muñoz' : 'María González Pérez';
       const email = isStaff ? 'carlos.munoz@saludsd.cl' : 'maria.gonzalez@email.com';
@@ -179,7 +194,7 @@ router.post('/claveunica/callback', async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user.id, rut: user.rut, nombre: user.nombre, email: user.email, role: user.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN as any }
     );
 
     return res.json({

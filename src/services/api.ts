@@ -30,17 +30,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status } = error.response;
-      
+
       // If 401 Unauthorized or token expired, clear session and reload/redirect
       if (status === 401) {
-        console.warn('Sesión expirada o no autorizada. Redirigiendo al login...');
-        localStorage.removeItem('saludsd_token');
-        localStorage.removeItem('saludsd_user');
-        
-        // Redirect to login page
-        if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-          window.location.href = '/login';
-        }
+        console.warn('Sesión expirada o no autorizada. Cerrando sesión...');
+
+        // Despachamos un evento personalizado para que AuthContext haga el logout correctamente en React
+        window.dispatchEvent(new Event('auth:unauthorized'));
       }
     }
     return Promise.reject(error);
