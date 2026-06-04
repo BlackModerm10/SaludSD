@@ -420,7 +420,6 @@ El servidor backend está desarrollado en **Node.js + Express** con **TypeScript
 #### 🔐 Autenticación y Cuentas (`/api/auth`)
 * `POST /api/auth/register` - Registro local de pacientes (valida RUT, encripta clave, genera JWT).
 * `POST /api/auth/login` - Inicio de sesión local (RUT + Contraseña, genera JWT).
-* `POST /api/auth/claveunica/callback` - Simulación del callback OIDC de ClaveÚnica para testing rápido.
 * `GET /api/auth/me` - [Protegido] Retorna los datos del usuario en sesión extraídos del token JWT.
 
 #### 📋 Listas de Espera (`/api/waitlist`)
@@ -646,7 +645,7 @@ Puedes acceder e interactuar con la base de datos en tiempo real usando:
 ## Entregables Adicionales (Carpeta `/otros`)
 Dentro de la carpeta `otros/` en la raíz del proyecto se incluyen los siguientes recursos para la evaluación:
 * 📂 **`diagramas/modelo_relacional.png`**: Diagrama de la base de datos relacional MySQL.
-* 📄 **`evidencia_pruebas.md`**: Detalle de las respuestas JSON, estructuras de datos y políticas de seguridad aplicadas.
+* 📂 **`CapturasPostman`**: Carpeta con las capturas de las pruebas en Postman.
 * 📄 **`SaludSD_API_Collection.postman_collection.json`**: Colección de Postman lista para importar y ejecutar pruebas funcionales de todos los endpoints.
 
 ---
