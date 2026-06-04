@@ -399,7 +399,7 @@ El sistema de SaludSD utiliza una base de datos relacional para garantizar la in
 ### Diagrama del Modelo Relacional
 El diagrama físico del modelo relacional se encuentra disponible en la carpeta `/otros/diagramas/modelo_relacional.png` y se detalla a continuación:
 
-<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/diagramas/modelo_relacional.png" width="400" height="400">
+<img src="https://github.com/BlackModerm10/SaludSD/blob/main/otros/diagramas/modelo_relacional.png" width="400" height="400">
 
 ### Tablas y Relaciones DDL (`schema.sql`)
 1. **`usuarios`**: Almacena el perfil (pacientes y funcionarios) con restricciones de RUT único y email único. Las contraseñas se almacenan cifradas (`password_hash`).
