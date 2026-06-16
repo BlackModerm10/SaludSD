@@ -746,3 +746,304 @@ body {
 .animate-in:nth-child(2) { animation-delay: 0.1s; }
 .animate-in:nth-child(3) { animation-delay: 0.2s; }
 .animate-in:nth-child(4) { animation-delay: 0.3s; }
+
+/* ── Dark Theme Overrides ── */
+body.dark-theme,
+body.dark-theme ion-app,
+body.dark-theme ion-content {
+  --ion-background-color: #080f1e !important;
+  --ion-text-color: #f1f5f9 !important;
+  background-color: #080f1e !important;
+  color: #f1f5f9 !important;
+
+  /* Gobierno CSS Variables overrides in dark mode */
+  --gob-tertiary: #f8fafc !important;
+  --gob-black: #ffffff !important;
+  --gob-accent: #94a3b8 !important;
+  --gob-neutral: #1e293b !important;
+}
+
+body.dark-theme .stat-card,
+body.dark-theme .waitlist-item,
+body.dark-theme .feature-card,
+body.dark-theme .auth-card,
+body.dark-theme .center-card,
+body.dark-theme .notification-item,
+body.dark-theme .admin-table {
+  background-color: #121b2d !important;
+  background: #121b2d !important;
+  color: #f1f5f9 !important;
+  border-color: #212f49 !important;
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme strong,
+body.dark-theme .stat-value,
+body.dark-theme label,
+body.dark-theme .section-header h2 {
+  color: #ffffff !important;
+}
+
+body.dark-theme p,
+body.dark-theme span:not(.material-icons-outlined):not(.tag-prioridad):not(.tag-estado),
+body.dark-theme td,
+body.dark-theme .stat-label {
+  color: #cbd5e1 !important;
+}
+
+body.dark-theme .admin-table th {
+  background-color: #0a0f1a !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .admin-table td {
+  border-bottom: 1px solid #212f49 !important;
+}
+
+body.dark-theme .admin-table tr:hover td {
+  background-color: #19243a !important;
+}
+
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea {
+  background-color: #161f30 !important;
+  color: #f8fafc !important;
+  border: 1.5px solid #2d3d5a !important;
+}
+
+body.dark-theme input:focus,
+body.dark-theme select:focus,
+body.dark-theme textarea:focus {
+  border-color: var(--gob-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 111, 179, 0.25) !important;
+}
+
+body.dark-theme .navbar.gob-navbar {
+  background-color: #060a14 !important;
+  border-bottom: 1px solid #121b2d !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+}
+
+body.dark-theme .navbar-brand span {
+  color: #ffffff !important;
+}
+
+body.dark-theme .gob-footer {
+  background-color: #050810 !important;
+  border-top: 1px solid #121b2d !important;
+}
+
+body.dark-theme .timeline-explanation,
+body.dark-theme div[style*="background: #fff"],
+body.dark-theme div[style*="background: rgb(255, 255, 255)"],
+body.dark-theme div[style*="background:#fff"] {
+  background-color: #121b2d !important;
+  background: #121b2d !important;
+  border-color: #212f49 !important;
+}
+
+body.dark-theme .dropdown-panel,
+body.dark-theme div[style*="box-shadow: rgba(0, 0, 0, 0.15)"] {
+  background-color: #121b2d !important;
+  border: 1px solid #212f49 !important;
+}
+
+body.dark-theme div[style*="background: #f8f9fa"],
+body.dark-theme div[style*="background: #f5f7fa"] {
+  background-color: #0e1624 !important;
+  background: #0e1624 !important;
+}
+
+body.dark-theme div[style*="border-bottom: 1px solid #eee"],
+body.dark-theme div[style*="border-top: 1px solid #eee"] {
+  border-color: #212f49 !important;
+}
+
+body.dark-theme div[style*="background: #f0f7ff"] {
+  background-color: #16263f !important;
+  background: #16263f !important;
+}
+
+body.dark-theme a {
+  color: #38bdf8 !important;
+}
+
+body.dark-theme button.btn-outline-secondary {
+  background-color: #161f30 !important;
+  border: 1px solid #2d3d5a !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme div[style*="background: #f0f7ff"] div,
+body.dark-theme div[style*="background: #f0f7ff"] span,
+body.dark-theme div[style*="background:#f0f7ff"] div,
+body.dark-theme div[style*="background:#f0f7ff"] span {
+  color: #38bdf8 !important;
+}
+
+body.dark-theme option {
+  background-color: #121b2d !important;
+  color: #f8fafc !important;
+}
+
+/* ── Custom UI Enhancements for SaludSD ── */
+
+/* 1. Quick Actions */
+.quick-action-card {
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: 1.1rem 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.quick-action-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gob-tertiary);
+}
+
+/* 2. Estimated Days Box */
+.estimated-days-box {
+  background: #f0f7ff;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+.estimated-days-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gob-primary);
+}
+.estimated-days-label {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+/* 3. Info Alert Card (Login page, etc) */
+.info-alert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0.75rem 1rem;
+  background: #f0f7ff;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+.info-alert-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gob-tertiary);
+}
+.info-alert-desc {
+  font-size: 0.78rem;
+  color: #888;
+  line-height: 1.5;
+}
+
+/* 4. Notification Bell Dropdown Item */
+.notification-bell-item {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  background: #fff;
+  transition: background 0.2s;
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  position: relative;
+}
+.notification-bell-item:hover {
+  background: #fcfcfc;
+}
+.notification-bell-item.unread {
+  background: #f0f7ff;
+}
+.notification-bell-item.unread:hover {
+  background: #e6f2ff;
+}
+.notification-bell-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gob-primary);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.notification-bell-title {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #333;
+}
+.notification-bell-message {
+  font-size: 0.76rem;
+  color: #666;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+.notification-bell-date {
+  font-size: 0.68rem;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+/* ── Dark Theme Overrides for Custom Classes ── */
+body.dark-theme .quick-action-card {
+  background-color: #121b2d !important;
+  background: #121b2d !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+body.dark-theme .quick-action-label {
+  color: #ffffff !important;
+}
+body.dark-theme .estimated-days-box {
+  background-color: #16263f !important;
+  background: #16263f !important;
+}
+body.dark-theme .estimated-days-number {
+  color: #38bdf8 !important;
+}
+body.dark-theme .estimated-days-label {
+  color: #a5b4fc !important;
+}
+body.dark-theme .info-alert-card {
+  background-color: #16263f !important;
+  background: #16263f !important;
+}
+body.dark-theme .info-alert-title {
+  color: #ffffff !important;
+}
+body.dark-theme .info-alert-desc {
+  color: #cbd5e1 !important;
+}
+body.dark-theme .notification-bell-item {
+  background-color: #121b2d !important;
+  background: #121b2d !important;
+  border-bottom: 1px solid #212f49 !important;
+}
+body.dark-theme .notification-bell-item:hover {
+  background-color: #1b283f !important;
+  background: #1b283f !important;
+}
+body.dark-theme .notification-bell-item.unread {
+  background-color: #16263f !important;
+  background: #16263f !important;
+}
+body.dark-theme .notification-bell-item.unread:hover {
+  background-color: #1e3252 !important;
+  background: #1e3252 !important;
+}
+body.dark-theme .notification-bell-title {
+  color: #ffffff !important;
+}
+body.dark-theme .notification-bell-message {
+  color: #cbd5e1 !important;
+}
+body.dark-theme .notification-bell-date {
+  color: #94a3b8 !important;
+}

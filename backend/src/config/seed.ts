@@ -5,6 +5,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
+import { encrypt } from './encryption.js';
 
 dotenv.config();
 
@@ -85,37 +86,37 @@ async function runSeed() {
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [mariaId, '12.345.678-5', 'María González Pérez', 'maria.gonzalez@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
+    `, [mariaId, encrypt('12.345.678-5'), 'María González Pérez', 'maria.gonzalez@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
 
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [carlosId, '9.876.543-3', 'Dr. Carlos Muñoz', 'carlos.munoz@saludsd.cl', passwordHash, 'Valparaíso', 'Santo Domingo', 'admin']);
+    `, [carlosId, encrypt('9.876.543-3'), 'Dr. Carlos Muñoz', 'carlos.munoz@saludsd.cl', passwordHash, 'Valparaíso', 'Santo Domingo', 'admin']);
 
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [juanId, '15.678.234-3', 'Juan Martínez López', 'juan.martinez@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
+    `, [juanId, encrypt('15.678.234-3'), 'Juan Martínez López', 'juan.martinez@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
 
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [anaId, '18.234.567-9', 'Ana Rojas Vera', 'ana.rojas@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
+    `, [anaId, encrypt('18.234.567-9'), 'Ana Rojas Vera', 'ana.rojas@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
 
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [pedroId, '11.222.333-9', 'Pedro Soto Díaz', 'pedro.soto@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
+    `, [pedroId, encrypt('11.222.333-9'), 'Pedro Soto Díaz', 'pedro.soto@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
 
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [luciaId, '14.555.666-K', 'Lucía Fernández', 'lucia.fernandez@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
+    `, [luciaId, encrypt('14.555.666-K'), 'Lucía Fernández', 'lucia.fernandez@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
 
     await conn.query(`
       INSERT INTO usuarios (id, rut, nombre, email, password_hash, region, comuna, role)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    `, [robertoId, '10.111.222-5', 'Roberto Morales', 'roberto.morales@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
+    `, [robertoId, encrypt('10.111.222-5'), 'Roberto Morales', 'roberto.morales@email.com', passwordHash, 'Valparaíso', 'Santo Domingo', 'paciente']);
 
     // 6. Sembrar Centros de Salud
     console.log('Sembrando centros de salud y especialidades...');
@@ -163,13 +164,14 @@ async function runSeed() {
     // 7. Sembrar Listas de Espera
     console.log('Sembrando listas de espera...');
     const waitList = [
-      { id: crypto.randomUUID(), pacienteId: mariaId, especialidad: 'Cardiología', centroId: 'hc1', fecha: '2026-02-15', prioridad: 'normal', estado: 'en_espera', tiempo: 45, posicion: 12 },
-      { id: crypto.randomUUID(), pacienteId: mariaId, especialidad: 'Oftalmología', centroId: 'hc4', fecha: '2026-03-01', prioridad: 'normal', estado: 'en_espera', tiempo: 78, posicion: 34 },
-      { id: crypto.randomUUID(), pacienteId: juanId, especialidad: 'Traumatología', centroId: 'hc1', fecha: '2026-01-20', prioridad: 'alta', estado: 'en_espera', tiempo: 15, posicion: 5 },
-      { id: crypto.randomUUID(), pacienteId: anaId, especialidad: 'Dermatología', centroId: 'hc4', fecha: '2026-03-10', prioridad: 'normal', estado: 'en_espera', tiempo: 60, posicion: 22 },
-      { id: crypto.randomUUID(), pacienteId: pedroId, especialidad: 'Medicina General', centroId: 'hc1', fecha: '2026-04-01', prioridad: 'urgente', estado: 'en_espera', tiempo: 7, posicion: 3 },
-      { id: crypto.randomUUID(), pacienteId: luciaId, especialidad: 'Ginecología', centroId: 'hc1', fecha: '2026-02-28', prioridad: 'alta', estado: 'en_espera', tiempo: 35, posicion: 18 },
-      { id: crypto.randomUUID(), pacienteId: robertoId, especialidad: 'Cardiología', centroId: 'hc4', fecha: '2026-01-10', prioridad: 'alta', estado: 'programada', tiempo: 25, posicion: 8 }
+      { id: crypto.randomUUID(), pacienteId: juanId, especialidad: 'Cardiología', centroId: 'hc1', fecha: '2026-02-10', prioridad: 'normal', estado: 'en_espera', tiempo: 45, posicion: 1 },
+      { id: crypto.randomUUID(), pacienteId: mariaId, especialidad: 'Cardiología', centroId: 'hc1', fecha: '2026-02-15', prioridad: 'normal', estado: 'en_espera', tiempo: 45, posicion: 2 },
+      { id: crypto.randomUUID(), pacienteId: mariaId, especialidad: 'Oftalmología', centroId: 'hc4', fecha: '2026-03-01', prioridad: 'normal', estado: 'en_espera', tiempo: 78, posicion: 1 },
+      { id: crypto.randomUUID(), pacienteId: juanId, especialidad: 'Traumatología', centroId: 'hc1', fecha: '2026-01-20', prioridad: 'alta', estado: 'en_espera', tiempo: 15, posicion: 1 },
+      { id: crypto.randomUUID(), pacienteId: anaId, especialidad: 'Dermatología', centroId: 'hc4', fecha: '2026-03-10', prioridad: 'normal', estado: 'en_espera', tiempo: 60, posicion: 1 },
+      { id: crypto.randomUUID(), pacienteId: pedroId, especialidad: 'Medicina General', centroId: 'hc1', fecha: '2026-04-01', prioridad: 'urgente', estado: 'en_espera', tiempo: 7, posicion: 1 },
+      { id: crypto.randomUUID(), pacienteId: luciaId, especialidad: 'Ginecología', centroId: 'hc1', fecha: '2026-02-28', prioridad: 'alta', estado: 'en_espera', tiempo: 35, posicion: 1 },
+      { id: crypto.randomUUID(), pacienteId: robertoId, especialidad: 'Cardiología', centroId: 'hc4', fecha: '2026-01-10', prioridad: 'alta', estado: 'programada', tiempo: 25, posicion: 1 }
     ];
 
     for (const w of waitList) {

@@ -11,6 +11,7 @@ const RequestAppointment: React.FC = () => {
   const [step, setStep] = useState(1);
   const [healthCenters, setHealthCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     especialidad: '', centro: '', motivo: '', prioridad: 'normal', fecha: '', horario: '',
   });
@@ -37,6 +38,7 @@ const RequestAppointment: React.FC = () => {
     : [];
 
   const handleSubmit = async () => {
+    setSubmitting(true);
     try {
       await api.post('/waitlist', {
         especialidad: form.especialidad,
@@ -48,6 +50,8 @@ const RequestAppointment: React.FC = () => {
     } catch (err) {
       console.error('Error al enviar solicitud de cita:', err);
       alert('Error de red: No se pudo ingresar la solicitud. Intente nuevamente.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -257,9 +261,10 @@ const RequestAppointment: React.FC = () => {
                         ← Anterior
                       </button>
                       <button className="btn btn-primary"
+                        disabled={submitting}
                         style={{ borderRadius: '20px', padding: '8px 24px', background: 'var(--gob-primary)', border: 'none', color: '#fff', cursor: 'pointer' }}
                         onClick={handleSubmit}>
-                        Confirmar Solicitud
+                        {submitting ? 'Enviando...' : 'Confirmar Solicitud'}
                       </button>
                     </div>
                   </div>
@@ -283,14 +288,22 @@ const RequestAppointment: React.FC = () => {
                       Tu solicitud de cita para <strong>{form.especialidad}</strong> ha sido registrada exitosamente en nuestra base de datos.
                       Recibirás una notificación cuando se programe tu atención.
                     </p>
-                    <div className="d-flex justify-content-center" style={{ gap: '12px' }}>
+                    <div className="d-flex justify-content-center flex-wrap" style={{ gap: '12px' }}>
                       <button className="btn btn-primary"
                         style={{ borderRadius: '20px', padding: '8px 24px', background: 'var(--gob-primary)', border: 'none', color: '#fff', cursor: 'pointer' }}
                         onClick={() => history.push('/paciente/lista-espera')}>
                         Ver mi lista
                       </button>
                       <button className="btn btn-outline-secondary"
-                        style={{ borderRadius: '20px', padding: '8px 24px', background: '#fff', border: '1px solid #ccc', cursor: 'pointer' }}
+                        style={{ borderRadius: '20px', padding: '8px 24px', background: '#fff', border: '1px solid #ccc', color: '#555', cursor: 'pointer' }}
+                        onClick={() => {
+                          setForm({ especialidad: '', centro: '', motivo: '', prioridad: 'normal', fecha: '', horario: '' });
+                          setStep(1);
+                        }}>
+                        Solicitar otra cita
+                      </button>
+                      <button className="btn btn-outline-secondary"
+                        style={{ borderRadius: '20px', padding: '8px 24px', background: '#fff', border: '1px solid #ccc', color: '#555', cursor: 'pointer' }}
                         onClick={() => history.push('/paciente/dashboard')}>
                         Ir al Dashboard
                       </button>

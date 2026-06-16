@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent } from '@ionic/react';
+import { IonPage, IonContent, IonSkeletonText } from '@ionic/react';
 import GobNavbar from '../../components/GobNavbar';
 import GobFooter from '../../components/GobFooter';
 import api from '../../services/api';
@@ -61,13 +61,22 @@ const History: React.FC = () => {
 
           {/* Appointments */}
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                border: '3px solid #e0e0e0', borderTopColor: 'var(--gob-primary)',
-                animation: 'spin 1s linear infinite', margin: '0 auto 1rem'
-              }} />
-              <p style={{ color: '#888' }}>Cargando historial de citas...</p>
+            <div>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="history-item" style={{ opacity: 0.7 }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '6px', background: '#eee', flexShrink: 0 }}>
+                    <IonSkeletonText animated style={{ width: '100%', height: '100%', borderRadius: '6px' }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div className="d-flex align-items-center" style={{ gap: '8px', marginBottom: '8px' }}>
+                      <IonSkeletonText animated style={{ width: '140px', height: '1.1rem' }} />
+                      <IonSkeletonText animated style={{ width: '80px', height: '1rem', borderRadius: '12px' }} />
+                    </div>
+                    <IonSkeletonText animated style={{ width: '180px', height: '0.85rem', marginBottom: '6px' }} />
+                    <IonSkeletonText animated style={{ width: '240px', height: '0.82rem' }} />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 0', color: '#888' }}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent } from '@ionic/react';
+import { IonPage, IonContent, IonAlert, IonSkeletonText } from '@ionic/react';
 import GobNavbar from '../../components/GobNavbar';
 import GobFooter from '../../components/GobFooter';
 import { ESPECIALIDADES } from '../../services/mockData';
@@ -19,6 +19,10 @@ const ManageLists: React.FC = () => {
   const [editForm, setEditForm] = useState({ estado: '', prioridad: '', posicion: 1 });
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Delete Alert state
+  const [showConfirmAlert, setShowConfirmAlert] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const fetchWaitList = () => {
     setLoading(true);
     api.get('/waitlist')
@@ -37,16 +41,22 @@ const ManageLists: React.FC = () => {
     fetchWaitList();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('¿Está seguro de que desea eliminar este paciente de la lista de espera?')) {
-      try {
-        await api.delete(`/waitlist/${id}`);
-        // Refetch or update local state
-        setWaitList(prev => prev.filter(w => w.id !== id));
-      } catch (err) {
-        console.error('Error al eliminar registro:', err);
-        alert('No se pudo eliminar el registro.');
-      }
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+    setShowConfirmAlert(true);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/waitlist/${deleteId}`);
+      setWaitList(prev => prev.filter(w => w.id !== deleteId));
+    } catch (err) {
+      console.error('Error al eliminar registro:', err);
+      alert('No se pudo eliminar el registro.');
+    } finally {
+      setShowConfirmAlert(false);
+      setDeleteId(null);
     }
   };
 
@@ -79,6 +89,14 @@ const ManageLists: React.FC = () => {
     }
   };
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 10;
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filterEsp, filterEstado, searchTerm]);
+
   const filtered = waitList.filter(w => {
     if (filterEsp && w.especialidad !== filterEsp) return false;
     if (filterEstado && w.estado !== filterEstado) return false;
@@ -89,6 +107,13 @@ const ManageLists: React.FC = () => {
     }
     return true;
   });
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const paginatedItems = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <IonPage>
@@ -219,18 +244,46 @@ const ManageLists: React.FC = () => {
 
           {/* Results Count */}
           <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.75rem' }}>
-            Mostrando <strong>{filtered.length}</strong> de {waitList.length} registros
+            Mostrando <strong>{paginatedItems.length}</strong> de {filtered.length} filtrados (Total: {waitList.length} registros)
           </p>
 
           {/* Table */}
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: '50%',
-                border: '3px solid #e0e0e0', borderTopColor: 'var(--gob-primary)',
-                animation: 'spin 1s linear infinite', margin: '0 auto 1rem'
-              }} />
-              <p style={{ color: '#888' }}>Cargando registros...</p>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="admin-table" style={{ opacity: 0.7 }}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Paciente</th>
+                    <th>RUT</th>
+                    <th>Especialidad</th>
+                    <th>Centro</th>
+                    <th>Fecha solicitud</th>
+                    <th>Posición</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <tr key={i}>
+                      <td><IonSkeletonText animated style={{ width: '20px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '120px', height: '1rem' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '80px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '100px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '130px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '75px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '40px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '60px', height: '1.25rem', borderRadius: '12px' }} /></td>
+                      <td><IonSkeletonText animated style={{ width: '70px', height: '1.25rem', borderRadius: '12px' }} /></td>
+                      <td>
+                        <IonSkeletonText animated style={{ width: '68px', height: '32px', borderRadius: '4px' }} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -250,9 +303,9 @@ const ManageLists: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((entry, idx) => (
+                  {paginatedItems.map((entry, idx) => (
                     <tr key={entry.id}>
-                      <td style={{ fontWeight: 500 }}>{idx + 1}</td>
+                      <td style={{ fontWeight: 500 }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 600, color: 'var(--gob-tertiary)' }}>{entry.pacienteNombre}</div>
                       </td>
@@ -280,7 +333,7 @@ const ManageLists: React.FC = () => {
                           style={{ cursor: 'pointer', background: '#e3f0ff', color: 'var(--gob-primary)', border: 'none', borderRadius: '4px', width: 32, height: 32, marginRight: 4 }}>
                           <span className="material-icons-outlined" style={{ fontSize: '1rem' }}>edit</span>
                         </button>
-                        <button className="action-btn delete" title="Eliminar" onClick={() => handleDelete(entry.id)}
+                        <button className="action-btn delete" title="Eliminar" onClick={() => handleDeleteClick(entry.id)}
                           style={{ cursor: 'pointer', background: '#f8d7da', color: '#dc3545', border: 'none', borderRadius: '4px', width: 32, height: 32 }}>
                           <span className="material-icons-outlined" style={{ fontSize: '1rem' }}>delete</span>
                         </button>
@@ -289,6 +342,31 @@ const ManageLists: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && totalPages > 1 && (
+            <div className="d-flex justify-content-between align-items-center" style={{ marginTop: '1rem', background: '#fff', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                style={{ cursor: 'pointer', borderRadius: '20px', padding: '6px 16px' }}
+              >
+                ← Anterior
+              </button>
+              <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                Página <strong>{currentPage}</strong> de {totalPages}
+              </span>
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                style={{ cursor: 'pointer', borderRadius: '20px', padding: '6px 16px' }}
+              >
+                Siguiente →
+              </button>
             </div>
           )}
 
@@ -302,6 +380,25 @@ const ManageLists: React.FC = () => {
           )}
         </div>
         <GobFooter />
+        <IonAlert
+          isOpen={showConfirmAlert}
+          onDidDismiss={() => { setShowConfirmAlert(false); setDeleteId(null); }}
+          header="Confirmar Eliminación"
+          message="¿Está seguro de que desea eliminar este paciente de la lista de espera?"
+          buttons={[
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Eliminar',
+              role: 'destructive',
+              handler: () => {
+                executeDelete();
+              }
+            }
+          ]}
+        />
         <style>{`
           @keyframes spin { to { transform: rotate(360deg); } }
         `}</style>

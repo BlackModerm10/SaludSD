@@ -1,0 +1,12 @@
+node_modules
+dist
+backend/node_modules
+backend/dist
+backend/logs
+.git
+.vscode
+Dockerfile
+.dockerignore
+mockups_entrega1
+cypress
+dist

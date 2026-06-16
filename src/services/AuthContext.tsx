@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from './api';
+import api, { clearApiCache } from './api';
 
 export interface User {
   id: string;
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       try {
         const res = await api.get('/auth/me');
-        const loggedUser = res.data.user;
+        const loggedUser = res.data;
         setUser(loggedUser);
         
         // Cargar rol guardado o por defecto
@@ -212,6 +212,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setShowRoleSelector(false);
     localStorage.removeItem('saludsd_token');
     localStorage.removeItem('saludsd_active_role');
+    clearApiCache();
   };
 
   return (

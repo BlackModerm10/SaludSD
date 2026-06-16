@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: saludsd-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '12345678'
+      MYSQL_DATABASE: 'saludsd'
+    ports:
+      - '3307:3306'
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./backend/src/models/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+    networks:
+      - saludsd-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: saludsd-backend
+    restart: always
+    environment:
+      PORT: 5000
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: '12345678'
+      DB_PORT: 3306
+      DB_NAME: saludsd
+      JWT_SECRET: saludsd_secret_key_for_jwt_2026_primary_health_sec!
+      JWT_EXPIRES_IN: 15m
+      ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:8080
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+    networks:
+      - saludsd-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saludsd-frontend
+    restart: always
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend
+    networks:
+      - saludsd-network
+
+volumes:
+  db-data:
+
+networks:
+  saludsd-network:
+    driver: bridge

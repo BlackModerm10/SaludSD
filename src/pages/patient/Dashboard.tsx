@@ -159,14 +159,43 @@ const PatientDashboard: React.FC = () => {
                     </div>
                   ) : (
                     waitList.slice(0, 3).map(entry => {
-                      const total = entry.totalEnLista || 1;
+                      const total = Math.max(entry.totalEnLista || 0, entry.posicion || 0);
                       const pos = entry.posicion || 1;
-                      const percent = Math.min(100, Math.max(0, Math.round(((total - pos) / total) * 100)));
+                      
+                      let percent = 0;
+                      let badgeContent: React.ReactNode = pos;
+                      let positionText = '';
+                      let progressText = '';
+                      let progressFillStyle: React.CSSProperties = {};
+
+                      if (entry.estado === 'en_espera') {
+                        percent = total > 0 ? Math.min(100, Math.max(1, Math.round(((total - pos + 1) / total) * 100))) : 0;
+                        positionText = `Posición ${pos} de ${total}`;
+                        progressText = `~${entry.tiempoEstimadoDias} días`;
+                      } else if (entry.estado === 'programada') {
+                        percent = 100;
+                        badgeContent = <span className="material-icons-outlined" style={{ fontSize: '1.15rem', verticalAlign: 'middle' }}>event</span>;
+                        positionText = 'Cita programada';
+                        progressText = '¡Turno asignado!';
+                        progressFillStyle = { background: 'linear-gradient(90deg, #28a745, #48c768)' };
+                      } else if (entry.estado === 'atendida' || entry.estado === 'completada') {
+                        percent = 100;
+                        badgeContent = <span className="material-icons-outlined" style={{ fontSize: '1.15rem', verticalAlign: 'middle' }}>check_circle</span>;
+                        positionText = 'Atención finalizada';
+                        progressText = 'Completado';
+                        progressFillStyle = { background: 'linear-gradient(90deg, #17a2b8, #38c2d8)' };
+                      } else {
+                        percent = 0;
+                        badgeContent = <span className="material-icons-outlined" style={{ fontSize: '1.15rem', verticalAlign: 'middle' }}>archive</span>;
+                        positionText = 'Solicitud retirada';
+                        progressText = 'Retirado';
+                        progressFillStyle = { background: '#888' };
+                      }
 
                       return (
                         <div key={entry.id} className={`waitlist-item prioridad-${entry.prioridad}`}>
                           <div className="d-flex align-items-center" style={{ gap: '14px' }}>
-                            <div className="position-badge">{pos}</div>
+                            <div className="position-badge">{badgeContent}</div>
                             <div style={{ flex: 1 }}>
                               <div className="d-flex align-items-center flex-wrap" style={{ gap: '8px', marginBottom: '4px' }}>
                                 <strong style={{ color: 'var(--gob-tertiary)', fontSize: '0.95rem' }}>
@@ -179,12 +208,12 @@ const PatientDashboard: React.FC = () => {
                               </div>
                               <div style={{ marginTop: '8px' }}>
                                 <div className="d-flex justify-content-between" style={{ fontSize: '0.78rem', color: '#888', marginBottom: 4 }}>
-                                  <span>Posición {pos} de {total}</span>
-                                  <span>~{entry.tiempoEstimadoDias} días</span>
+                                  <span>{positionText}</span>
+                                  <span>{progressText}</span>
                                 </div>
                                 <div className="progress-custom">
                                   <div className="progress-fill"
-                                    style={{ width: `${percent}%` }} />
+                                    style={{ width: `${percent}%`, ...progressFillStyle }} />
                                 </div>
                               </div>
                             </div>
@@ -266,15 +295,7 @@ const PatientDashboard: React.FC = () => {
                       <div className="col-6 mb-3" key={i}>
                         <div
                           onClick={() => history.push(action.path)}
-                          style={{
-                            background: '#fff',
-                            borderRadius: 'var(--radius-md)',
-                            padding: '1.1rem 0.75rem',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            boxShadow: 'var(--shadow-sm)',
-                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                          }}
+                          className="quick-action-card"
                           onMouseEnter={(e) => {
                             (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
                             (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-md)';
@@ -284,11 +305,11 @@ const PatientDashboard: React.FC = () => {
                             (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-sm)';
                           }}
                         >
-                          <span className="material-icons-outlined"
+                          <span className="material-icons-outlined quick-action-icon"
                             style={{ fontSize: '1.8rem', color: action.color, marginBottom: '0.4rem', display: 'block' }}>
                             {action.icon}
                           </span>
-                          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--gob-tertiary)' }}>
+                          <div className="quick-action-label">
                             {action.label}
                           </div>
                         </div>

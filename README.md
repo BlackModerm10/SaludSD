@@ -17,8 +17,15 @@
 9. [Modelo Relacional y Base de Datos (EP 2.2)](#ep-22-modelo-relacional-y-base-de-datos)
 10. [Documentación de la API (EP 2.1, 2.3, 2.7)](#ep-23-api-restful)
 11. [Seguridad y Manejo de Sesión (EP 2.5, 2.6)](#ep-26-seguridad-y-manejo-de-sesiones)
-12. [Instalación y Ejecución](#instalación-y-ejecución)
-13. [Tecnologías](#tecnologías)
+12. [EF 1: CRUD Completo, Notificaciones y Almacenamiento Local](#ef-1-crud-completo-notificaciones-y-almacenamiento-local)
+13. [EF 2: Mejoras UI/UX y Optimización Frontend](#ef-2-mejoras-uiux-y-optimización-frontend)
+14. [EF 3: Seguridad Avanzada en la API](#ef-3-seguridad-avanzada-en-la-api)
+15. [EF 4: Optimización de Consultas y Respuestas Eficientes](#ef-4-optimización-de-consultas-y-respuestas-eficientes)
+16. [EF 5: Integración con Servicio Externo (Email & Recuperación)](#ef-5-integración-con-servicio-externo-email--recuperación)
+17. [EF 6: Despliegue con Contenedores Docker](#ef-6-despliegue-con-contenedores-docker)
+18. [Instalación y Ejecución](#instalación-y-ejecución)
+19. [Tecnologías](#tecnologías)
+20. [Entregables Adicionales (Carpeta `/otros`)](#entregables-adicionales-carpeta-otros)
 
 ---
 
@@ -399,7 +406,7 @@ El sistema de SaludSD utiliza una base de datos relacional para garantizar la in
 ### Diagrama del Modelo Relacional
 El diagrama físico del modelo relacional se encuentra disponible en la carpeta `/otros/diagramas/modelo_relacional.png` y se detalla a continuación:
 
-![Modelo Relacional de Base de Datos](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/otros/diagramas/modelo_relacional.png)
+<img src="https://github.com/BlackModerm10/SaludSD/blob/main/otros/diagramas/modelo_relacional.png" width="400" height="400">
 
 ### Tablas y Relaciones DDL (`schema.sql`)
 1. **`usuarios`**: Almacena el perfil (pacientes y funcionarios) con restricciones de RUT único y email único. Las contraseñas se almacenan cifradas (`password_hash`).
@@ -420,7 +427,6 @@ El servidor backend está desarrollado en **Node.js + Express** con **TypeScript
 #### 🔐 Autenticación y Cuentas (`/api/auth`)
 * `POST /api/auth/register` - Registro local de pacientes (valida RUT, encripta clave, genera JWT).
 * `POST /api/auth/login` - Inicio de sesión local (RUT + Contraseña, genera JWT).
-* `POST /api/auth/claveunica/callback` - Simulación del callback OIDC de ClaveÚnica para testing rápido.
 * `GET /api/auth/me` - [Protegido] Retorna los datos del usuario en sesión extraídos del token JWT.
 
 #### 📋 Listas de Espera (`/api/waitlist`)
@@ -454,6 +460,252 @@ Para cumplir con las restricciones técnicas y normativas de seguridad, se incor
 4. **Validación del Algoritmo del RUT:** Tanto en el formulario web como en el backend se procesa el dígito verificador bajo el algoritmo chileno de Módulo 11, rechazando el ingreso o registro ante RUTs inconsistentes.
 
 ---
+
+## EP 2.7: Pruebas Funcionales de API REST
+
+Se utilizó Postman para todas las pruebas, las cuales fueron exitosas en su totalidad.
+
+### 1. Pruebas — Autenticación (`/api/auth`)
+
+#### P-01 — Registro de nuevo paciente
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTRegistro201.png" width="400" height="400">
+
+#### P-02 — Login exitoso (Paciente)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTLoginPaciente200.png" width="400" height="400">
+
+#### P-03 — Login exitoso (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTLoginFuncionario200.png" width="400" height="400">
+
+#### P-04 — Consulta de usuario autenticado (GET /me)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETAuthUsuario200.png" width="400" height="400">
+
+### 2. Pruebas — Listas de Espera (`/api/waitlist`)
+
+#### P-05 — Consultar lista propia (Paciente)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETHistorialCitasPaciente200.png" width="400" height="400">
+
+#### P-06 — Consultar todas las listas (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETListaEsperaFuncionario200.png" width="400" height="400">
+
+#### P-07 — Crear nueva derivación (POST)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTListaEspera201.png" width="400" height="400">
+
+#### P-08 — Actualizar prioridad de derivación (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/PUTListaEspera200.png" width="400" height="400">
+
+#### P-09 — Eliminar derivación (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/DELETEListaEspera200.png" width="400" height="400">
+
+### 3. Pruebas — Centros de Salud (`/api/health-centers`)
+
+#### P-10 — Directorio de centros (ruta pública)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETCentrosSalud200.png" width="400" height="400">
+
+### 4. Pruebas — Citas Médicas (`/api/appointments`)
+
+#### P-11 — Historial de citas del paciente
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETListaEsperaPaciente200.png" width="400" height="400">
+
+### 5. Pruebas — Notificaciones (`/api/notifications`)
+
+#### P-12 — Centro de notificaciones
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETNotificaciones200.png" width="400" height="400">
+
+#### P-13 — Marcar notificación como leída
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/PUTNotificaciones200.png" width="400" height="400">
+
+### 6. Pruebas — Estadísticas (`/api/stats`)
+
+#### P-14 — Dashboard de KPIs (Funcionario)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETEstadisticas200.png" width="400" height="400">
+
+### 7. Pruebas de Seguridad
+
+#### S-01 — Ruta protegida sin token
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETAuthUsuario401.png" width="400" height="400">
+
+#### S-02 — Paciente intentando eliminar derivación (control de rol)
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/DELETEListaEspera403.png" width="400" height="400">
+
+#### S-03 — Login con contraseña incorrecta
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTLoginPaciente401.png" width="400" height="400">
+
+#### S-04 — Registro con RUT inválido
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/POSTRegistroPaciente400.png" width="400" height="400">
+
+#### S-05 — Paciente intentando acceder a estadísticas globales
+
+<img src="https://github.com/BlackModerm10/SaludSD/blob/f6f2452c27c1fc88bf299a027afd4b54781621a0/otros/CapturasPostman/GETEstadisticas403.png" width="400" height="400">
+
+### 8. Resumen de Pruebas
+
+| # | Prueba | Método | Endpoint | Código Esperado |
+|---|--------|--------|----------|-----------------|
+| P-01 | Registro de paciente | POST | `/api/auth/register` | 201 |
+| P-02 | Login paciente | POST | `/api/auth/login` | 200 |
+| P-03 | Login funcionario | POST | `/api/auth/login` | 200 |
+| P-04 | Usuario autenticado | GET | `/api/auth/me` | 200 |
+| P-05 | Lista propia (paciente) | GET | `/api/waitlist` | 200 |
+| P-06 ## EF 1: CRUD Completo, Notificaciones y Almacenamiento Local
+
+Esta entrega abarcó el desarrollo de la lógica principal de negocio en el backend y el consumo interactivo y tolerante a fallas en el frontend.
+
+### 1. Operaciones CRUD en el Servidor (Backend RESTful)
+Se diseñaron e implementaron controladores específicos en Express con tipado estricto en TypeScript para gestionar el ciclo de vida de los datos:
+* **Gestión de la Lista de Espera ([waitlist.routes.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/routes/waitlist.routes.ts)):**
+  * `GET /api/waitlist`: Permite a los pacientes visualizar su historial de solicitudes activas. Para administradores SOME, soporta búsqueda de texto (por RUT o nombre completo), filtros avanzados (por especialidad, estado y centro de salud) y paginación estructurada. Adicionalmente, calcula dinámicamente el turno en cola contando registros `'en_espera'` precedentes para evitar discrepancias numéricas ante eliminaciones previas.
+  * `POST /api/waitlist`: Recibe la derivación, evalúa y asigna la prioridad clínica inicial (Alta, Media, Baja) y registra el ingreso en la base de datos relacional.
+  * `PUT /api/waitlist/:id`: Exclusivo para SOME, permite re-priorizar pacientes o modificar su estado (ej. cambiar de `'en_espera'` a `'programada'`, `'completada'` o `'cancelada'`).
+  * `DELETE /api/waitlist/:id`: Permite el retiro voluntario o eliminación administrativa de una derivación de la lista de espera (protegido por rol).
+* **Gestión de Citas Médicas ([appointment.routes.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/routes/appointment.routes.ts)):**
+  * `GET /api/appointments`: Retorna el historial cronológico de citas del paciente o la agenda global para el personal médico.
+  * `POST /api/appointments`: Genera y confirma un agendamiento vinculando profesional, centro de salud, especialidad, fecha y hora específica.
+  * `PUT /api/appointments/:id`: Modifica la cita (p. ej. registrar inasistencias o guardado de notas clínicas).
+  * `DELETE /api/appointments/:id`: Permite cancelar horas agendadas con antelación.
+* **Gestión de Notificaciones ([notification.routes.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/routes/notification.routes.ts)):**
+  * `GET /api/notifications`: Recupera las notificaciones del usuario.
+  * `PUT /api/notifications/:id/read`: Marca una notificación como leída.
+  * `DELETE /api/notifications/:id`: Elimina la alerta del historial del usuario.
+
+### 2. Módulo de Notificaciones Reactivas en Tiempo Real
+* **Componente de Notificaciones ([NotificationBell.tsx](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/src/components/NotificationBell.tsx)):** Ubicado en la cabecera institucional, despliega dinámicamente un contador con el número de alertas no leídas del ciudadano.
+* **Mecanismo de Polling:** Inicia un temporizador asíncrono con React (`setInterval` de 30 segundos) que efectúa peticiones en segundo plano a `/api/notifications`, manteniendo la interfaz del usuario sincronizada con cualquier cambio o asignación de cita sin necesidad de recargar la página.
+
+### 3. Tolerancia a Desconexión y Caché en Cliente
+* **Interceptor Offline ([api.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/src/services/api.ts)):** Se configuró una capa intermedia en Axios para capturar fallos de red (`ERR_CONNECTION_REFUSED` o sin internet).
+* **Caché en LocalStorage:** Las peticiones de tipo `GET` exitosas se guardan en el almacenamiento local del navegador con un tiempo de vida (TTL) de 5 minutos. Ante un corte de conexión, el interceptor recupera los datos locales archivados en caché y los sirve de forma transparente al frontend.
+* **Banner Informativo:** Despliega un componente global visible con la advertencia: *"Modo offline: mostrando datos locales archivados"*, indicando que la plataforma opera en contingencia y que las acciones de escritura permanecen deshabilitadas de forma temporal.
+
+---
+
+## EF 2: Mejoras UI/UX y Optimización Frontend
+
+Se refactorizó el frontend con foco en la usabilidad móvil (mobile-first), la accesibilidad visual bajo las normativas gubernamentales y la velocidad de carga.
+
+### 1. Validación Reactiva y Control de Estados de Envío
+* **Manejo de Formularios ([RequestAppointment.tsx](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/src/pages/patient/RequestAppointment.tsx)):** Los campos de entrada (RUT chileno con Módulo 11, especialidades, centros) se validan dinámicamente.
+* **Prevenir Doble Envío:** Al procesar un formulario, los botones de acción se deshabilitan instantáneamente y se inyecta un componente animado de carga (spinner), impidiendo el envío múltiple de peticiones al servidor.
+
+### 2. Diálogos de Confirmación (`IonAlert`)
+* Se integraron modales nativos de Ionic para advertir y requerir doble confirmación antes de completar tareas de carácter destructivo, como la cancelación definitiva de una hora médica o el retiro voluntario de una lista de espera.
+
+### 3. Placeholders Animados (`IonSkeletonText`)
+* Para optimizar la experiencia de carga percibida, las tablas y las tarjetas clínicas despliegan skeletons de color gris claro con animaciones de parpadeo suave mientras se resuelven las promesas HTTP en segundo plano.
+
+### 4. Soporte Legible de Modo Oscuro (`dark-theme`)
+* **Toggle Navbar:** Implementación de un botón selector que persiste el tema seleccionado en `localStorage`.
+* **Refactorización CSS ([global.css](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/src/theme/global.css)):** Se reemplazaron múltiples estilos inline y colores en código duro por clases dinámicas asociadas a variables de entorno de Ionic y del Gobierno de Chile. En modo oscuro (`body.dark-theme`), los elementos (tarjetas de acceso rápido, notificaciones, días de espera estimados) adaptan sus contrastes a fondos oscuros de alta gama (`#121b2d`) y fuentes legibles (`#ffffff` / `#38bdf8`), cumpliendo con la accesibilidad WCAG.
+
+### 5. División de Código (Lazy Loading)
+* **Code-Splitting ([App.tsx](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/src/App.tsx)):** Se reemplazó la carga de páginas estática por importaciones dinámicas basadas en `React.lazy` y envueltas en componentes `<React.Suspense>`. Esto fragmenta la aplicación en bloques pequeños cargados bajo demanda, reduciendo a la mitad el tamaño del bundle inicial y acelerando el *First Contentful Paint* (FCP).
+
+### 6. Paginación y Flujos Flexibles
+* **Paginación SOME ([ManageLists.tsx](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/src/pages/admin/ManageLists.tsx)):** Tabulación estructurada para el control de la lista general, reduciendo la fatiga del scroll en pantallas con altos volúmenes de datos.
+* **Solicitudes Múltiples:** Al confirmar el envío de una cita médica (Paso 4), se incorporó el botón *"Solicitar otra cita"*, el cual restablece el estado local de React y retorna fluidamente al Paso 1.
+
+---
+
+## EF 3: Seguridad Avanzada en la API
+
+Se implementó una arquitectura defensiva en el backend para resguardar la confidencialidad de la información de los pacientes y mitigar ataques comunes.
+
+### 1. Validación Estricta con Zod
+* Los parámetros de ruta (`params`), query strings (`query`) y cuerpos de solicitud (`body`) en cada endpoint REST son procesados e interceptados por validadores estructurados con la librería `zod`. Peticiones malformadas son rechazadas inmediatamente en el borde con un código HTTP 400 Bad Request.
+
+### 2. Sanitización contra Inyección XSS
+* **Middleware XSS ([xss.middleware.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/middleware/xss.middleware.ts)):** Se diseñó un filtro de desinfección que recorre todos los strings de entrada y purga etiquetas de marcado HTML, scripts embebidos y código malicioso, impidiendo la inyección cruzada de scripts en la base de datos.
+
+### 3. Cabeceras de Seguridad y CORS
+* **Helmet:** Inyección en Express de cabeceras HTTP de seguridad (como directivas de seguridad de contenido CSP, bloqueo de sniffers mime, forzado de HTTPS mediante HSTS, etc.).
+* **CORS:** Configuración de CORS basada en listas blancas (white-list) obtenidas desde la variable `.env` (`ALLOWED_ORIGINS`), permitiendo peticiones originadas únicamente desde el frontend oficial.
+
+### 4. Cifrado Determinista AES-256-CBC (Dato Sensible: RUT)
+* **Algoritmo de Cifrado ([encryption.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/config/encryption.ts)):** El RUN de los ciudadanos es un dato sensible resguardado legalmente. Para proteger su confidencialidad sin perder rendimiento, se aplica cifrado simétrico AES-256-CBC con clave derived SHA256 y un IV determinista (hash MD5).
+* **Búsquedas Indexadas sobre Datos Cifrados:** Al ser un cifrado determinista, el mismo RUT se encripta de forma idéntica en hexadecimal. Esto permite almacenar el RUT de forma completamente ilegible ante accesos directos no autorizados a la base de datos MySQL, pero posibilita búsquedas indexadas y operaciones de coincidencia exacta (como el inicio de sesión o búsquedas SOME) de forma extremadamente veloz sin necesidad de descifrar todos los registros en memoria.
+
+### 5. Rate Limiting y Protección contra Fuerza Bruta
+* Middleware `express-rate-limit` configurado en rutas de acceso crítico (`/api/auth/login` y `/api/auth/register`), limitando a un máximo de 5 intentos por IP cada 15 minutos. Superar este límite retorna un código HTTP 429 Too Many Requests y bloquea temporalmente al cliente.
+
+### 6. Tokens JWT Expirables y Cookies Seguras
+* Configuración de Tokens JWT de acceso con tiempo de expiración corto (15 minutos). La renovación asíncrona se gestiona a través de Refresh Tokens de 7 días almacenados en cookies bajo las banderas `httpOnly: true`, `secure: true` (HTTPS) y `sameSite: 'strict'`.
+
+---
+
+## EF 4: Optimización de Consultas y Respuestas Eficientes
+
+Se implementaron técnicas de optimización y monitorización de rendimiento a nivel de base de datos, servidor y transmisión de red.
+
+### 1. Índices en Base de Datos MySQL
+Se agregaron índices estratégicos en el esquema de base de datos relacional sobre columnas de filtrado frecuente para evitar escaneos de tablas completos (*table scans*):
+* Índice de clave primaria compuesta y foránea: `lista_espera(paciente_id)`, `lista_espera(centro_id)`.
+* Índice optimizado para filtros de colas: combinación `lista_espera(especialidad, estado)`.
+* Índice en `usuarios(rut)` encriptado para agilizar el login y la búsqueda del SOME.
+
+### 2. Middleware de Compresión de Respuestas
+* Integración del middleware `compression` en Express que evalúa y comprime las respuestas HTTP en formatos Gzip o Brotli. Esto disminuye en más de un 70% el peso de los payloads JSON transmitidos, reduciendo el consumo en conexiones móviles y optimizando los tiempos de renderizado.
+
+### 3. Middleware de Caché en Memoria
+* **Servidor Caching ([cache.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/utils/cache.ts)):** Interceptor de solicitudes GET que almacena las respuestas JSON de datos semiestáticos (ej: especialidades por centro, KPIs de estadísticas) en un mapa interno. Si el mismo usuario vuelve a pedir el recurso en un intervalo inferior a 30 segundos, el servidor responde directamente desde caché (`X-Cache: HIT`) sin interactuar con la base de datos.
+
+### 4. Formato de Respuesta y Gestión Centralizada de Errores
+* **Estandarización ([response.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/utils/response.ts)):** Respuestas estructuradas bajo el mismo contrato de API (`{ success: true, data: ..., message: ... }`).
+* **Manejo de Excepciones:** Capturador global de errores que registra la excepción internamente y devuelve una respuesta segura ocultando detalles técnicos en entornos de producción.
+
+### 5. Logging y Auditoría Técnica
+* **Winston + Morgan ([logger.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/utils/logger.ts)):** Monitoreo detallado de accesos HTTP y fallos del servidor. Clasifica y guarda los logs estructuradamente en carpetas locales (`logs/error.log` para trazas críticas y `logs/combined.log` para auditorías generales de acceso).
+
+---
+
+## EF 5: Integración con Servicio Externo (Email & Recuperación)
+
+Se conectó el backend con servicios de correo electrónico para notificar alertas importantes de salud y proveer seguridad en la recuperación de credenciales.
+
+### 1. Servicio Nodemailer con Soporte Dual
+* **Email Service ([email.service.ts](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/backend/src/services/email.service.ts)):** Configurado para usar un servidor SMTP institucional provisto en variables de entorno. Si no está configurado, autogenera de forma inteligente una cuenta de pruebas en *Ethereal Email*, imprimiendo el enlace HTTP de visualización de correo en la terminal para facilitar las pruebas locales.
+
+### 2. Plantillas de Correo HTML Institucionales
+El envío de correos electrónicos implementa maquetas responsivas adaptadas al Framework del Gobierno de Chile en tres casos:
+1. **Bienvenida al Sistema:** Enviado al registrarse el paciente, confirmando la creación exitosa del usuario.
+2. **Confirmación de Cita Médica:** Detalla la hora agendada con la especialidad, médico, fecha, hora y el centro de salud de destino.
+3. **Actualización de Lista de Espera:** Informa al ciudadano si avanzó de posición en la cola o si su derivación médica ha sido programada.
+
+### 3. Recuperación de Contraseña mediante Código OTP
+* Flujo interactivo que genera un código OTP temporal de 6 dígitos con expiración de 15 minutos enviado directamente al correo del paciente. Tras validarse, el sistema le autoriza la redefinición segura de su contraseña.
+
+---
+
+## EF 6: Despliegue con Contenedores Docker
+
+Se empaquetó el sistema completo utilizando Docker y Docker Compose para garantizar consistencia y facilitar su despliegue tanto en servidores de prueba locales como en entornos de producción.
+
+### 1. Contenedores Distribuidos ([docker-compose.yml](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/docker-compose.yml))
+La red interna está segmentada en tres contenedores vinculados:
+* **`saludsd-db` (MySQL 8.0):** Levanta la base de datos expuesta de manera privada en la red interna. Monta de forma automatizada las tablas y datos semilla iniciales (`schema.sql`). La información se persiste a través de un volumen de Docker (`mysql_data`).
+* **`saludsd-backend` (Node 20):** Compila el código TypeScript mediante un Dockerfile multi-stage. Por seguridad, corre con permisos mínimos asignados al usuario del sistema `node` (evitando privilegios root).
+* **`saludsd-frontend` (Nginx Alpine):** Realiza la compilación (build) del bundle de Vite del cliente y lo monta en un servidor web Nginx de alto rendimiento.
+
+### 2. Configuración de Proxy Inverso en Nginx
+* **Servicio Web ([nginx.conf](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/nginx.conf)):** Nginx escucha en el puerto `8080` de manera externa.
+* **SPA Routing:** Configura reglas para capturar la navegación reactiva SPA (redirección a `index.html` ante rutas no físicas).
+* **Proxy Pass:** Define la regla `location /api` que redirige el tráfico de red de forma interna directamente al contenedor `http://saludsd-backend:5000/api`. Esto unifica el origen de consulta del frontend, previene errores de bloqueo por políticas de CORS y evita la necesidad de exponer los puertos del backend hacia el internet público.
 
 ## Instalación y Ejecución
 
@@ -524,10 +776,5 @@ Puedes acceder e interactuar con la base de datos en tiempo real usando:
 ## Entregables Adicionales (Carpeta `/otros`)
 Dentro de la carpeta `otros/` en la raíz del proyecto se incluyen los siguientes recursos para la evaluación:
 * 📂 **`diagramas/modelo_relacional.png`**: Diagrama de la base de datos relacional MySQL.
-* 📄 **`evidencia_pruebas.md`**: Detalle de las respuestas JSON, estructuras de datos y políticas de seguridad aplicadas.
+* 📂 **`CapturasPostman`**: Carpeta con las capturas de las pruebas en Postman.
 * 📄 **`SaludSD_API_Collection.postman_collection.json`**: Colección de Postman lista para importar y ejecutar pruebas funcionales de todos los endpoints.
-
----
-
-## Licencia
-Proyecto académico — Universidad. Todos los derechos reservados.

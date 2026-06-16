@@ -380,20 +380,16 @@ const Login: React.FC = () => {
             </div>
 
             {/* Info cards */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{
-                display: 'flex', alignItems: 'flex-start', gap: '10px',
-                padding: '0.75rem 1rem', background: '#f0f7ff',
-                borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem',
-              }}>
+             <div style={{ marginBottom: '1.5rem' }}>
+              <div className="info-alert-card">
                 <span className="material-icons-outlined" style={{ color: 'var(--gob-primary)', fontSize: '1.1rem', marginTop: 2 }}>
                   vpn_key
                 </span>
                 <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gob-tertiary)' }}>
+                  <div className="info-alert-title">
                     Acceso para pruebas locales
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#888', lineHeight: 1.5 }}>
+                  <div className="info-alert-desc">
                     Puedes registrarte con el formulario o usar las ClaveÚnica de simulación. La contraseña común por defecto para cuentas semilla es <strong>123456</strong>.
                   </div>
                 </div>

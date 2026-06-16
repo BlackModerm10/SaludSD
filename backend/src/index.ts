@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth.routes.js';
 import centerRouter from './routes/center.routes.js';
@@ -7,15 +10,74 @@ import waitlistRouter from './routes/waitlist.routes.js';
 import appointmentRouter from './routes/appointment.routes.js';
 import notificationRouter from './routes/notification.routes.js';
 import { query } from './config/db.js';
+import { xssMiddleware } from './middleware/xss.middleware.js';
+import { sendSuccess, sendError } from './utils/response.js';
+import { cacheMiddleware } from './utils/cache.js';
+import morgan from 'morgan';
+import logger from './utils/logger.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// Security and Performance Middlewares
+app.use(helmet());
+app.use(compression());
+
+// Logger middleware
+const morganMiddleware = morgan(
+  ':method :url :status :res[content-length] - :response-time ms',
+  {
+    stream: {
+      write: (message) => logger.http(message.trim()),
+    },
+  }
+);
+app.use(morganMiddleware);
+
+// Secure CORS Config
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por la política de CORS de SaludSD'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(xssMiddleware);
+
+// Rate Limiting Config
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 200, 
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes desde esta IP, intente de nuevo en 15 minutos.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 5, // 5 attempts limit
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de inicio de sesión o registro, intente de nuevo en 15 minutos.' }
+});
+
+// Mount Rate Limiters
+app.use('/api', generalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 
 // Routes mounting
 app.use('/api/auth', authRouter);
@@ -25,7 +87,7 @@ app.use('/api/appointments', appointmentRouter);
 app.use('/api/notifications', notificationRouter);
 
 // GET /api/stats - Obtener estadísticas globales para el Dashboard del Administrador
-app.get('/api/stats', async (req, res) => {
+app.get('/api/stats', cacheMiddleware(10000), async (req, res) => {
   try {
     // 1. Total pacientes en espera (estado = 'en_espera')
     const totalWaitingRes = await query("SELECT COUNT(*) as count FROM lista_espera WHERE estado = 'en_espera'");
@@ -78,7 +140,7 @@ app.get('/api/stats', async (req, res) => {
       centroMasSaturado = sortedCenters[0].nombre;
     }
 
-    return res.json({
+    return sendSuccess(res, {
       totalPacientesEspera,
       tiempoPromedioEspera,
       citasHoy,
@@ -88,20 +150,62 @@ app.get('/api/stats', async (req, res) => {
       tendencia: 'estable',
       porEspecialidad,
       porCentro
-    });
+    }, 'Estadísticas globales obtenidas con éxito.');
 
   } catch (error) {
     console.error('Error al generar estadísticas de salud:', error);
-    return res.status(500).json({ error: 'Error del servidor al calcular estadísticas.' });
+    return sendError(res, 'Error del servidor al calcular estadísticas.', 500);
   }
 });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date() });
+  return sendSuccess(res, { status: 'ok', timestamp: new Date() }, 'Health check ok.');
 });
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`SaludSD Servidor API: Corriendo en http://localhost:${PORT}`);
-});
+const startServer = async () => {
+  try {
+    const migrations = [
+      "ALTER TABLE usuarios ADD COLUMN refresh_token VARCHAR(255) NULL;",
+      "ALTER TABLE usuarios ADD COLUMN reset_otp VARCHAR(6) NULL;",
+      "ALTER TABLE usuarios ADD COLUMN reset_otp_expiry BIGINT NULL;",
+      "ALTER TABLE usuarios MODIFY COLUMN rut VARCHAR(100) NOT NULL;"
+    ];
+    for (const sql of migrations) {
+      try {
+        await query(sql);
+      } catch (err) {
+        // Ignore column already exists or similar errors
+      }
+    }
+    console.log('MySQL schema: columnas de sesión, recuperación OTP y longitud de RUT verificadas/actualizadas.');
+
+    // DB Optimization indexes
+    const indexes = [
+      "CREATE INDEX idx_waitlist_paciente ON lista_espera(paciente_id);",
+      "CREATE INDEX idx_waitlist_centro ON lista_espera(centro_id);",
+      "CREATE INDEX idx_waitlist_esp_state ON lista_espera(especialidad, estado);",
+      "CREATE INDEX idx_citas_paciente ON citas(paciente_id);",
+      "CREATE INDEX idx_citas_centro ON citas(centro_id);",
+      "CREATE INDEX idx_citas_date ON citas(fecha);",
+      "CREATE INDEX idx_notifications_user ON notificaciones(usuario_id);",
+    ];
+    for (const sql of indexes) {
+      try {
+        await query(sql);
+      } catch (err) {
+        // Ignore if index already exists
+      }
+    }
+    console.log('MySQL schema: índices de optimización verificados.');
+  } catch (err) {
+    // Ignore error if column already exists
+  }
+  
+  app.listen(PORT, () => {
+    console.log(`SaludSD Servidor API: Corriendo en http://localhost:${PORT}`);
+  });
+};
+
+startServer();

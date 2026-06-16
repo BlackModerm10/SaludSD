@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IonPage, IonContent } from '@ionic/react';
+import { IonPage, IonContent, IonSkeletonText } from '@ionic/react';
 import GobNavbar from '../../components/GobNavbar';
 import GobFooter from '../../components/GobFooter';
 import api from '../../services/api';
@@ -43,13 +43,37 @@ const WaitList: React.FC = () => {
           </p>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%',
-                border: '3px solid #e0e0e0', borderTopColor: 'var(--gob-primary)',
-                animation: 'spin 1s linear infinite', margin: '0 auto 1rem'
-              }} />
-              <p style={{ color: '#888' }}>Cargando tus listas de espera...</p>
+            <div>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="waitlist-item" style={{ borderLeftColor: '#e0e0e0', opacity: 0.7 }}>
+                  <div className="d-flex align-items-start" style={{ gap: '16px' }}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <IonSkeletonText animated style={{ width: '40%', height: '40%', borderRadius: '50%' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="d-flex align-items-center" style={{ gap: '8px', marginBottom: '8px' }}>
+                        <IonSkeletonText animated style={{ width: '150px', height: '1.2rem' }} />
+                        <IonSkeletonText animated style={{ width: '70px', height: '1.1rem', borderRadius: '12px' }} />
+                        <IonSkeletonText animated style={{ width: '80px', height: '1.1rem', borderRadius: '12px' }} />
+                      </div>
+                      <div className="row mt-2">
+                        <div className="col-sm-6">
+                          <IonSkeletonText animated style={{ width: '80%', height: '0.85rem', marginBottom: '8px' }} />
+                          <IonSkeletonText animated style={{ width: '60%', height: '0.85rem' }} />
+                        </div>
+                        <div className="col-sm-6 text-sm-right mt-2 mt-sm-0">
+                          <div style={{ float: 'right', width: '100px' }}>
+                            <IonSkeletonText animated style={{ width: '100%', height: '2.5rem', borderRadius: '10px' }} />
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '12px' }}>
+                        <IonSkeletonText animated style={{ width: '100%', height: '8px', borderRadius: '4px' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : entries.length === 0 ? (
             <div style={{
@@ -66,15 +90,44 @@ const WaitList: React.FC = () => {
             </div>
           ) : (
             entries.map((entry, idx) => {
-              const total = entry.totalEnLista || 1;
+              const total = Math.max(entry.totalEnLista || 0, entry.posicion || 0);
               const pos = entry.posicion || 1;
-              const percent = Math.min(100, Math.max(0, Math.round(((total - pos) / total) * 100)));
+              
+              let percent = 0;
+              let badgeContent: React.ReactNode = pos;
+              let positionText = '';
+              let progressText = '';
+              let progressFillStyle: React.CSSProperties = {};
+
+              if (entry.estado === 'en_espera') {
+                percent = total > 0 ? Math.min(100, Math.max(1, Math.round(((total - pos + 1) / total) * 100))) : 0;
+                positionText = `Posición ${pos} de ${total}`;
+                progressText = `${percent}% avanzado`;
+              } else if (entry.estado === 'programada') {
+                percent = 100;
+                badgeContent = <span className="material-icons-outlined" style={{ fontSize: '1.25rem', verticalAlign: 'middle' }}>event</span>;
+                positionText = 'Cita programada';
+                progressText = '¡Turno asignado!';
+                progressFillStyle = { background: 'linear-gradient(90deg, #28a745, #48c768)' };
+              } else if (entry.estado === 'atendida' || entry.estado === 'completada') {
+                percent = 100;
+                badgeContent = <span className="material-icons-outlined" style={{ fontSize: '1.25rem', verticalAlign: 'middle' }}>check_circle</span>;
+                positionText = 'Atención finalizada';
+                progressText = 'Completado';
+                progressFillStyle = { background: 'linear-gradient(90deg, #17a2b8, #38c2d8)' };
+              } else {
+                percent = 0;
+                badgeContent = <span className="material-icons-outlined" style={{ fontSize: '1.25rem', verticalAlign: 'middle' }}>archive</span>;
+                positionText = 'Solicitud retirada';
+                progressText = 'Retirado';
+                progressFillStyle = { background: '#888' };
+              }
 
               return (
                 <div key={entry.id} className={`waitlist-item prioridad-${entry.prioridad} animate-in`}
                   style={{ animationDelay: `${idx * 0.1}s` }}>
                   <div className="d-flex align-items-start" style={{ gap: '16px' }}>
-                    <div className="position-badge">{pos}</div>
+                    <div className="position-badge">{badgeContent}</div>
                     <div style={{ flex: 1 }}>
                       <div className="d-flex align-items-center flex-wrap" style={{ gap: '8px', marginBottom: '6px' }}>
                         <strong style={{ color: 'var(--gob-tertiary)', fontSize: '1.05rem' }}>
@@ -103,28 +156,23 @@ const WaitList: React.FC = () => {
                           </div>
                         </div>
                         <div className="col-sm-6 text-sm-right mt-2 mt-sm-0">
-                          <div style={{
-                            background: '#f0f7ff',
-                            borderRadius: '10px',
-                            padding: '0.75rem 1rem',
-                            textAlign: 'center'
-                          }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gob-primary)' }}>
+                          <div className="estimated-days-box">
+                            <div className="estimated-days-number">
                               ~{entry.tiempoEstimadoDias}
                             </div>
-                            <div style={{ fontSize: '0.78rem', color: '#888' }}>días estimados</div>
+                            <div className="estimated-days-label">días estimados</div>
                           </div>
                         </div>
                       </div>
 
                       <div style={{ marginTop: '12px' }}>
                         <div className="d-flex justify-content-between" style={{ fontSize: '0.78rem', color: '#888', marginBottom: 4 }}>
-                          <span>Posición {pos} de {total}</span>
-                          <span>{percent}% avanzado</span>
+                          <span>{positionText}</span>
+                          <span>{progressText}</span>
                         </div>
                         <div className="progress-custom">
                           <div className="progress-fill"
-                            style={{ width: `${percent}%` }} />
+                            style={{ width: `${percent}%`, ...progressFillStyle }} />
                         </div>
                       </div>
                     </div>

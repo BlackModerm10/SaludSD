@@ -1,11 +1,26 @@
 import React from 'react';
 import { useAuth } from '../services/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
 
 const GobNavbar: React.FC = () => {
   const { user, isAuthenticated, isStaff, activeRole, logout, selectRole } = useAuth();
   const history = useHistory();
   const location = useLocation();
+
+  const [darkMode, setDarkMode] = React.useState(() => {
+    return localStorage.getItem('saludsd_theme') === 'dark';
+  });
+
+  React.useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-theme');
+      localStorage.setItem('saludsd_theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-theme');
+      localStorage.setItem('saludsd_theme', 'light');
+    }
+  }, [darkMode]);
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 
@@ -15,7 +30,7 @@ const GobNavbar: React.FC = () => {
   };
 
   const handleSwitchRole = () => {
-    const newRole = user?.role === 'admin' ? 'paciente' : 'admin';
+    const newRole = activeRole === 'admin' ? 'paciente' : 'admin';
     selectRole(newRole as 'paciente' | 'admin');
     if (newRole === 'paciente') {
       history.push('/paciente/dashboard');
@@ -88,7 +103,7 @@ const GobNavbar: React.FC = () => {
                   </a>
                 </li>
               </>
-            ) : user?.role === 'paciente' ? (
+            ) : activeRole === 'paciente' ? (
               <>
                 <li className="nav-item">
                   <a className={`nav-link ${isActive('/paciente/dashboard') ? 'active' : ''}`}
@@ -135,6 +150,9 @@ const GobNavbar: React.FC = () => {
                   </li>
                 )}
 
+                <li className="nav-item" style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+                  <NotificationBell />
+                </li>
                 <li className="nav-item" style={{ marginLeft: '0.25rem' }}>
                   <a className="nav-link d-flex align-items-center" href="#"
                     onClick={(e) => { e.preventDefault(); handleLogout(); }}
@@ -185,6 +203,9 @@ const GobNavbar: React.FC = () => {
                   </li>
                 )}
 
+                <li className="nav-item" style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+                  <NotificationBell />
+                </li>
                 <li className="nav-item" style={{ marginLeft: '0.25rem' }}>
                   <a className="nav-link d-flex align-items-center" href="#"
                     onClick={(e) => { e.preventDefault(); handleLogout(); }}
@@ -195,6 +216,27 @@ const GobNavbar: React.FC = () => {
                 </li>
               </>
             )}
+            <li className="nav-item" style={{ marginLeft: '0.5rem' }}>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  outline: 'none'
+                }}
+                title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                <span className="material-icons-outlined" style={{ fontSize: '1.35rem' }}>
+                  {darkMode ? 'light_mode' : 'dark_mode'}
+                </span>
+              </button>
+            </li>
           </ul>
         </div>
       </div>
