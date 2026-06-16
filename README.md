@@ -564,7 +564,26 @@ Se utilizó Postman para todas las pruebas, las cuales fueron exitosas en su tot
 | P-03 | Login funcionario | POST | `/api/auth/login` | 200 |
 | P-04 | Usuario autenticado | GET | `/api/auth/me` | 200 |
 | P-05 | Lista propia (paciente) | GET | `/api/waitlist` | 200 |
-| P-06 ## EF 1: CRUD Completo, Notificaciones y Almacenamiento Local
+| P-06 | Todas las listas (funcionario) | GET | `/api/waitlist` | 200 |
+| P-07 | Nueva derivación | POST | `/api/waitlist` | 201 |
+| P-08 | Actualizar derivación | PUT | `/api/waitlist/:id` | 200 |
+| P-09 | Eliminar derivación | DELETE | `/api/waitlist/:id` | 200 |
+| P-10 | Directorio centros salud | GET | `/api/health-centers` | 200 |
+| P-11 | Historial de citas | GET | `/api/appointments` | 200 |
+| P-12 | Centro de notificaciones | GET | `/api/notifications` | 200 |
+| P-13 | Marcar notificación leída | PUT | `/api/notifications/:id/read` | 200 |
+| P-14 | KPIs y estadísticas | GET | `/api/stats` | 200 |
+| S-01 | Sin token | GET | `/api/auth/me` | 401 |
+| S-02 | Control de rol DELETE | DELETE | `/api/waitlist/:id` | 403 |
+| S-03 | Contraseña incorrecta | POST | `/api/auth/login` | 401 |
+| S-04 | RUT inválido | POST | `/api/auth/register` | 400 |
+| S-05 | Paciente accede a stats | GET | `/api/stats` | 403 |
+
+**Total pruebas:** 19 | **Exitosas:** 19 | **Fallidas:** 0
+
+---
+
+## EF 1: CRUD Completo, Notificaciones y Almacenamiento Local
 
 Esta entrega abarcó el desarrollo de la lógica principal de negocio en el backend y el consumo interactivo y tolerante a fallas en el frontend.
 
@@ -706,6 +725,8 @@ La red interna está segmentada en tres contenedores vinculados:
 * **Servicio Web ([nginx.conf](file:///c:/Users/matia/OneDrive/Desktop/Web%20y%20movil/saludsd/nginx.conf)):** Nginx escucha en el puerto `8080` de manera externa.
 * **SPA Routing:** Configura reglas para capturar la navegación reactiva SPA (redirección a `index.html` ante rutas no físicas).
 * **Proxy Pass:** Define la regla `location /api` que redirige el tráfico de red de forma interna directamente al contenedor `http://saludsd-backend:5000/api`. Esto unifica el origen de consulta del frontend, previene errores de bloqueo por políticas de CORS y evita la necesidad de exponer los puertos del backend hacia el internet público.
+
+---
 
 ## Instalación y Ejecución
 

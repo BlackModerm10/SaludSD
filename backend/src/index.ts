@@ -10,6 +10,7 @@ import waitlistRouter from './routes/waitlist.routes.js';
 import appointmentRouter from './routes/appointment.routes.js';
 import notificationRouter from './routes/notification.routes.js';
 import { query } from './config/db.js';
+import { authMiddleware, requireRole } from './middleware/auth.middleware.js';
 import { xssMiddleware } from './middleware/xss.middleware.js';
 import { sendSuccess, sendError } from './utils/response.js';
 import { cacheMiddleware } from './utils/cache.js';
@@ -87,7 +88,7 @@ app.use('/api/appointments', appointmentRouter);
 app.use('/api/notifications', notificationRouter);
 
 // GET /api/stats - Obtener estadísticas globales para el Dashboard del Administrador
-app.get('/api/stats', cacheMiddleware(10000), async (req, res) => {
+app.get('/api/stats', authMiddleware, requireRole('admin'), cacheMiddleware(10000), async (req, res) => {
   try {
     // 1. Total pacientes en espera (estado = 'en_espera')
     const totalWaitingRes = await query("SELECT COUNT(*) as count FROM lista_espera WHERE estado = 'en_espera'");

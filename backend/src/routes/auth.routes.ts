@@ -20,11 +20,13 @@ const STAFF_RUTS = [
 ];
 
 // Helper to validate RUT format/DV
-function validateRut(rut: string): boolean {
-  const cleaned = rut.replace(/[^0-9kK]/g, '');
+function validateRut(rut: string | number): boolean {
+  if (!rut) return false;
+  const rutStr = String(rut);
+  const cleaned = rutStr.replace(/[^0-9kK]/g, '').toUpperCase();
   if (cleaned.length < 2) return false;
   const body = cleaned.slice(0, -1);
-  const dv = cleaned.slice(-1).toUpperCase();
+  const dv = cleaned.slice(-1);
   let sum = 0;
   let mul = 2;
   for (let i = body.length - 1; i >= 0; i--) {
@@ -60,7 +62,10 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 
   const { nombre, rut, email, password, region, comuna } = parsed.data;
-  const encryptedRut = encrypt(rut);
+  const rutStr = String(rut);
+  const passStr = String(password);
+  const emailStr = String(email);
+  const encryptedRut = encrypt(rutStr);
 
   try {
     // Verificar si el RUT ya existe (buscando el RUT cifrado)
@@ -70,17 +75,17 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 
     // Verificar si el email ya existe
-    const emailCheck = await query('SELECT id FROM usuarios WHERE email = $1', [email]);
+    const emailCheck = await query('SELECT id FROM usuarios WHERE email = $1', [emailStr]);
     if (emailCheck.rows.length > 0) {
       return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
     }
 
-    // Cifrar la contraseña (Rounds = 12)
-    const salt = bcrypt.genSaltSync(12);
-    const passwordHash = bcrypt.hashSync(password, salt);
+    // Cifrar la contraseña
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(passStr, salt);
 
     // Determinar rol
-    const role = STAFF_RUTS.includes(rut) ? 'admin' : 'paciente';
+    const role = STAFF_RUTS.includes(rutStr) ? 'admin' : 'paciente';
 
     // Generar UUID local
     const id = crypto.randomUUID();
@@ -90,9 +95,9 @@ router.post('/register', async (req: Request, res: Response) => {
     await query(`
       INSERT INTO usuarios (id, nombre, rut, email, password_hash, region, comuna, role, refresh_token)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-    `, [id, nombre, encryptedRut, email, passwordHash, region, comuna, role, refreshToken]);
+    `, [id, nombre, encryptedRut, emailStr, passwordHash, region, comuna, role, refreshToken]);
 
-    const newUser = { id, nombre, rut, email, role };
+    const newUser = { id, nombre: String(nombre), rut: rutStr, email: emailStr, role };
 
     // Generar JWT (con RUT plano)
     const token = jwt.sign(
@@ -126,7 +131,9 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 
   const { rut, password } = parsed.data;
-  const encryptedRut = encrypt(rut);
+  const rutStr = String(rut);
+  const passStr = String(password);
+  const encryptedRut = encrypt(rutStr);
 
   try {
     const result = await query('SELECT * FROM usuarios WHERE rut = $1', [encryptedRut]);
@@ -136,7 +143,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const user = result.rows[0];
 
-    const match = bcrypt.compareSync(password, user.password_hash);
+    const match = await bcrypt.compare(passStr, user.password_hash);
     if (!match) {
       return res.status(401).json({ error: 'Credenciales inválidas.' });
     }
@@ -177,17 +184,17 @@ router.post('/claveunica/callback', async (req: Request, res: Response) => {
 
   try {
     let rut = '12.345.678-5'; // Paciente por defecto (María González)
-    
+
     if (code === 'mock_admin_code' || state === 'mock_admin_state') {
       rut = '9.876.543-3'; // Funcionario por defecto (Carlos Muñoz)
     }
 
     const encryptedRut = encrypt(rut);
     let result = await query('SELECT * FROM usuarios WHERE rut = $1', [encryptedRut]);
-    
+
     if (result.rows.length === 0) {
-      const salt = bcrypt.genSaltSync(12);
-      const passwordHash = bcrypt.hashSync('123456', salt);
+      const salt = await bcrypt.genSalt(12);
+      const passwordHash = await bcrypt.hash('123456', salt);
       const isStaff = STAFF_RUTS.includes(rut);
       const nombre = isStaff ? 'Dr. Carlos Muñoz' : 'María González Pérez';
       const email = isStaff ? 'carlos.munoz@saludsd.cl' : 'maria.gonzalez@email.com';

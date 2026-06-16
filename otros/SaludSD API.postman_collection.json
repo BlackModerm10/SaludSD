@@ -1,0 +1,1585 @@
+{
+  "info": {
+    "_postman_id": "726a3d28-08c7-482b-a2ea-c537af29a037",
+    "name": "SaludSD API",
+    "description": "Colección de pruebas funcionales para la API RESTful del sistema SaludSD — Gestión de Listas de Espera, Municipalidad de Santo Domingo.\n\n**Instrucciones de uso:**\n1. Importar esta colección en Postman.\n2. Configurar las variables de entorno: `base_url` (por defecto `http://localhost:5000`) y `token` (se llena automáticamente al hacer login).\n3. Ejecutar primero las peticiones de la carpeta `Auth` para obtener el JWT.\n4. Las demás carpetas requieren el token en la variable `{{token}}`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55443381",
+    "_collection_link": "https://go.postman.co/collection/55443381-726a3d28-08c7-482b-a2ea-c537af29a037?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Registro de Paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"rut\": \"15.234.567-8\",\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"Pass1234!\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "**RF-09** — Registra un nuevo paciente con RUT chileno válido. El backend valida el dígito verificador (Módulo 11) y encripta la contraseña con bcrypt antes de persistir."
+          },
+          "response": [
+            {
+              "name": "201 Created — Registro exitoso",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"rut\": \"15.234.567-8\",\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"Pass1234!\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "**RF-09** — Registra un nuevo paciente con RUT chileno válido. El backend valida el dígito verificador (Módulo 11) y encripta la contraseña con bcrypt antes de persistir."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Usuario registrado exitosamente\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 3,\n    \"nombre\": \"Ana Pérez\",\n    \"rut\": \"15.234.567-8\",\n    \"email\": \"ana.perez@example.com\",\n    \"rol\": \"paciente\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — RUT inválido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"rut\": \"15.234.567-8\",\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"Pass1234!\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "**RF-09** — Registra un nuevo paciente con RUT chileno válido. El backend valida el dígito verificador (Módulo 11) y encripta la contraseña con bcrypt antes de persistir."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"RUT inválido. El dígito verificador no corresponde.\"\n}"
+            },
+            {
+              "name": "409 Conflict — RUT o email ya registrado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"rut\": \"15.234.567-8\",\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"Pass1234!\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "**RF-09** — Registra un nuevo paciente con RUT chileno válido. El backend valida el dígito verificador (Módulo 11) y encripta la contraseña con bcrypt antes de persistir."
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"El RUT o email ya se encuentra registrado en el sistema.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login (Paciente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('Token guardado en variable {{token}}');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rut\": \"12.345.678-5\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**RF-09** — Inicio de sesión con RUT y contraseña. Credenciales de demostración: paciente `12.345.678-5` / `123456`. El script de test guarda automáticamente el JWT en `{{token}}`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Login exitoso",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rut\": \"12.345.678-5\",\n  \"password\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "**RF-09** — Inicio de sesión con RUT y contraseña. Credenciales de demostración: paciente `12.345.678-5` / `123456`. El script de test guarda automáticamente el JWT en `{{token}}`."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sIjoicGFjaWVudGUiLCJpYXQiOjE3NDg4MDAwMDAsImV4cCI6MTc0OTQwNDgwMH0.EXAMPLE\",\n  \"user\": {\n    \"id\": 1,\n    \"nombre\": \"María González\",\n    \"rut\": \"12.345.678-5\",\n    \"rol\": \"paciente\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized — Credenciales incorrectas",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rut\": \"12.345.678-5\",\n  \"password\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "**RF-09** — Inicio de sesión con RUT y contraseña. Credenciales de demostración: paciente `12.345.678-5` / `123456`. El script de test guarda automáticamente el JWT en `{{token}}`."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"RUT o contraseña incorrectos.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login (Funcionario)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('Token de funcionario guardado.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rut\": \"9.876.543-3\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login con credenciales del funcionario SOME Dr. Carlos Muñoz. Retorna JWT con `rol: funcionario`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Login Funcionario",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rut\": \"9.876.543-3\",\n  \"password\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Login con credenciales del funcionario SOME Dr. Carlos Muñoz. Retorna JWT con `rol: funcionario`."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 2,\n    \"nombre\": \"Dr. Carlos Muñoz\",\n    \"rut\": \"9.876.543-3\",\n    \"rol\": \"funcionario\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "ClaveÚnica Callback (Simulación)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"mock_authorization_code_12345\",\n  \"state\": \"random_state_string\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/claveunica/callback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "claveunica",
+                "callback"
+              ]
+            },
+            "description": "**RF-09** — Simula el callback OIDC de ClaveÚnica del Gobierno de Chile para entornos de testing. En producción, este flujo es manejado por el proveedor de identidad oficial."
+          },
+          "response": [
+            {
+              "name": "200 OK — ClaveÚnica simulada",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"mock_authorization_code_12345\",\n  \"state\": \"random_state_string\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/claveunica/callback",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "claveunica",
+                    "callback"
+                  ]
+                },
+                "description": "**RF-09** — Simula el callback OIDC de ClaveÚnica del Gobierno de Chile para entornos de testing. En producción, este flujo es manejado por el proveedor de identidad oficial."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"nombre\": \"María González\",\n    \"rut\": \"12.345.678-5\",\n    \"rol\": \"paciente\"\n  },\n  \"message\": \"Autenticación via ClaveÚnica simulada exitosa\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me — Usuario autenticado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "**Ruta protegida.** Retorna el perfil completo del usuario cuyo JWT está en el header `Authorization`. Útil para verificar la sesión activa en el frontend."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/auth/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "me"
+                  ]
+                },
+                "description": "**Ruta protegida.** Retorna el perfil completo del usuario cuyo JWT está en el header `Authorization`. Útil para verificar la sesión activa en el frontend."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"nombre\": \"María González\",\n  \"rut\": \"12.345.678-5\",\n  \"email\": \"maria.gonzalez@example.com\",\n  \"rol\": \"paciente\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token ausente o expirado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/auth/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "me"
+                  ]
+                },
+                "description": "**Ruta protegida.** Retorna el perfil completo del usuario cuyo JWT está en el header `Authorization`. Útil para verificar la sesión activa en el frontend."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Token no proporcionado o expirado. Inicie sesión nuevamente.\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Registro, inicio de sesión y consulta del usuario autenticado."
+    },
+    {
+      "name": "📋 Listas de Espera",
+      "item": [
+        {
+          "name": "GET /waitlist — Lista propia (Paciente)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/waitlist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "waitlist"
+              ]
+            },
+            "description": "**RF-01** — Retorna la lista de espera del paciente autenticado: posición actual, especialidad, centro de salud, fecha de solicitud y tiempo estimado en días."
+          },
+          "response": [
+            {
+              "name": "200 OK — Lista del paciente",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist"
+                  ]
+                },
+                "description": "**RF-01** — Retorna la lista de espera del paciente autenticado: posición actual, especialidad, centro de salud, fecha de solicitud y tiempo estimado en días."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"especialidad\": \"Cardiología\",\n      \"centro_salud\": \"CESFAM Santo Domingo\",\n      \"fecha_solicitud\": \"2025-10-15\",\n      \"posicion\": 12,\n      \"total_espera\": 89,\n      \"tiempo_estimado_dias\": 180,\n      \"estado\": \"en_espera\",\n      \"prioridad\": \"normal\"\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /waitlist — Todas (Funcionario, con filtros)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/waitlist?especialidad=Cardiología&estado=en_espera&page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "waitlist"
+              ],
+              "query": [
+                {
+                  "key": "especialidad",
+                  "value": "Cardiología"
+                },
+                {
+                  "key": "estado",
+                  "value": "en_espera"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "**RF-06** — Funcionario SOME: visualiza todas las derivaciones con filtros por especialidad, estado y búsqueda por RUT. Requiere `rol: funcionario` en el JWT."
+          },
+          "response": [
+            {
+              "name": "200 OK — Lista completa para SOME",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist?especialidad=Cardiología&estado=en_espera&page=1&limit=10",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist"
+                  ],
+                  "query": [
+                    {
+                      "key": "especialidad",
+                      "value": "Cardiología"
+                    },
+                    {
+                      "key": "estado",
+                      "value": "en_espera"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "**RF-06** — Funcionario SOME: visualiza todas las derivaciones con filtros por especialidad, estado y búsqueda por RUT. Requiere `rol: funcionario` en el JWT."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"paciente\": { \"nombre\": \"María González\", \"rut\": \"12.345.678-5\" },\n      \"especialidad\": \"Cardiología\",\n      \"centro_salud\": \"CESFAM Santo Domingo\",\n      \"fecha_solicitud\": \"2025-10-15\",\n      \"posicion\": 12,\n      \"prioridad\": \"normal\",\n      \"estado\": \"en_espera\"\n    }\n  ],\n  \"total\": 47,\n  \"page\": 1,\n  \"limit\": 10\n}"
+            },
+            {
+              "name": "403 Forbidden — Paciente intentando ver lista global",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist?especialidad=Cardiología&estado=en_espera&page=1&limit=10",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist"
+                  ],
+                  "query": [
+                    {
+                      "key": "especialidad",
+                      "value": "Cardiología"
+                    },
+                    {
+                      "key": "estado",
+                      "value": "en_espera"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "**RF-06** — Funcionario SOME: visualiza todas las derivaciones con filtros por especialidad, estado y búsqueda por RUT. Requiere `rol: funcionario` en el JWT."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Acceso denegado. Se requiere rol de funcionario.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /waitlist — Nueva derivación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"especialidad\": \"Neurología\",\n  \"centro_salud_id\": 1,\n  \"preferencia_horaria\": \"mañana\",\n  \"notas\": \"Derivación por médico de cabecera\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/waitlist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "waitlist"
+              ]
+            },
+            "description": "**RF-02** — Crea una nueva solicitud de cita. El backend calcula automáticamente la posición en la cola según la fecha de solicitud y prioridad."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"especialidad\": \"Neurología\",\n  \"centro_salud_id\": 1,\n  \"preferencia_horaria\": \"mañana\",\n  \"notas\": \"Derivación por médico de cabecera\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist"
+                  ]
+                },
+                "description": "**RF-02** — Crea una nueva solicitud de cita. El backend calcula automáticamente la posición en la cola según la fecha de solicitud y prioridad."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Derivación registrada exitosamente\",\n  \"data\": {\n    \"id\": 48,\n    \"especialidad\": \"Neurología\",\n    \"posicion\": 73,\n    \"tiempo_estimado_dias\": 420,\n    \"estado\": \"en_espera\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /waitlist/:id — Actualizar derivación (Funcionario)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prioridad\": \"alta\",\n  \"estado\": \"en_espera\",\n  \"centro_salud_id\": 1,\n  \"notas\": \"Paciente con condición agravada. Prioridad elevada por médico tratante.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/waitlist/{{waitlist_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "waitlist",
+                "{{waitlist_id}}"
+              ]
+            },
+            "description": "**RF-06** — Solo funcionarios SOME. Permite actualizar prioridad, estado o centro de derivación de un registro. El cambio de prioridad recalcula la posición en la cola."
+          },
+          "response": [
+            {
+              "name": "200 OK — Actualización exitosa",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prioridad\": \"alta\",\n  \"estado\": \"en_espera\",\n  \"centro_salud_id\": 1,\n  \"notas\": \"Paciente con condición agravada. Prioridad elevada por médico tratante.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist/{{waitlist_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist",
+                    "{{waitlist_id}}"
+                  ]
+                },
+                "description": "**RF-06** — Solo funcionarios SOME. Permite actualizar prioridad, estado o centro de derivación de un registro. El cambio de prioridad recalcula la posición en la cola."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Registro actualizado\",\n  \"data\": {\n    \"id\": 1,\n    \"prioridad\": \"alta\",\n    \"posicion\": 3,\n    \"estado\": \"en_espera\"\n  }\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prioridad\": \"alta\",\n  \"estado\": \"en_espera\",\n  \"centro_salud_id\": 1,\n  \"notas\": \"Paciente con condición agravada. Prioridad elevada por médico tratante.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist/{{waitlist_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist",
+                    "{{waitlist_id}}"
+                  ]
+                },
+                "description": "**RF-06** — Solo funcionarios SOME. Permite actualizar prioridad, estado o centro de derivación de un registro. El cambio de prioridad recalcula la posición en la cola."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Derivación con id 99 no encontrada.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /waitlist/:id — Eliminar derivación (Funcionario)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/waitlist/{{waitlist_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "waitlist",
+                "{{waitlist_id}}"
+              ]
+            },
+            "description": "**RF-06** — Solo funcionarios SOME. Elimina una derivación de la lista. La posición de los demás pacientes se recalcula automáticamente."
+          },
+          "response": [
+            {
+              "name": "200 OK — Eliminación exitosa",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist/{{waitlist_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist",
+                    "{{waitlist_id}}"
+                  ]
+                },
+                "description": "**RF-06** — Solo funcionarios SOME. Elimina una derivación de la lista. La posición de los demás pacientes se recalcula automáticamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Derivación eliminada exitosamente.\"\n}"
+            },
+            {
+              "name": "403 Forbidden — Paciente intentando eliminar",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist/{{waitlist_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist",
+                    "{{waitlist_id}}"
+                  ]
+                },
+                "description": "**RF-06** — Solo funcionarios SOME. Elimina una derivación de la lista. La posición de los demás pacientes se recalcula automáticamente."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Acceso denegado. Se requiere rol de funcionario.\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "CRUD de derivaciones y posiciones en lista de espera."
+    },
+    {
+      "name": "🏥 Centros de Salud",
+      "item": [
+        {
+          "name": "GET /health-centers — Directorio comunal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health-centers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "health-centers"
+              ]
+            },
+            "description": "**RF-05** — Ruta pública (no requiere autenticación). Retorna los 4 centros de salud de la comuna con sus especialidades, porcentaje de ocupación actual y tiempos de espera promedio."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/health-centers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "health-centers"
+                  ]
+                },
+                "description": "**RF-05** — Ruta pública (no requiere autenticación). Retorna los 4 centros de salud de la comuna con sus especialidades, porcentaje de ocupación actual y tiempos de espera promedio."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"nombre\": \"CESFAM Santo Domingo\",\n      \"tipo\": \"CESFAM\",\n      \"direccion\": \"Las Hortensias #146, Santo Domingo\",\n      \"telefono\": \"+56 35 220 4500\",\n      \"especialidades\": [\"Medicina General\", \"Cardiología\", \"Neurología\", \"Pediatría\"],\n      \"ocupacion_porcentaje\": 87,\n      \"tiempo_espera_promedio_dias\": 250\n    },\n    {\n      \"id\": 2,\n      \"nombre\": \"Posta Rural El Convento\",\n      \"tipo\": \"Posta\",\n      \"direccion\": \"Sector El Convento s/n\",\n      \"telefono\": \"+56 9 6669 3380\",\n      \"especialidades\": [\"Medicina General\"],\n      \"ocupacion_porcentaje\": 62,\n      \"tiempo_espera_promedio_dias\": 90\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📅 Citas Médicas",
+      "item": [
+        {
+          "name": "GET /appointments — Historial de citas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/appointments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appointments"
+              ]
+            },
+            "description": "**RF-03** — Retorna el historial completo de citas del paciente autenticado, incluyendo citas agendadas, finalizadas y canceladas, con detalle del médico, centro y estado."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/appointments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "appointments"
+                  ]
+                },
+                "description": "**RF-03** — Retorna el historial completo de citas del paciente autenticado, incluyendo citas agendadas, finalizadas y canceladas, con detalle del médico, centro y estado."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 5,\n      \"especialidad\": \"Medicina General\",\n      \"medico\": \"Dra. Ana Torres\",\n      \"centro_salud\": \"CESFAM Santo Domingo\",\n      \"fecha\": \"2025-08-20\",\n      \"hora\": \"10:30\",\n      \"estado\": \"finalizada\",\n      \"notas_clinicas\": \"Control rutinario. Sin hallazgos relevantes.\"\n    },\n    {\n      \"id\": 9,\n      \"especialidad\": \"Cardiología\",\n      \"medico\": \"Dr. Carlos Muñoz\",\n      \"centro_salud\": \"CESFAM Santo Domingo\",\n      \"fecha\": \"2026-03-10\",\n      \"hora\": \"09:00\",\n      \"estado\": \"agendada\",\n      \"notas_clinicas\": null\n    }\n  ],\n  \"total\": 2\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notificaciones",
+      "item": [
+        {
+          "name": "GET /notifications — Centro de notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ]
+            },
+            "description": "**RF-04** — Retorna todas las notificaciones del usuario autenticado, indicando cuáles han sido leídas y cuáles no."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/notifications",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "notifications"
+                  ]
+                },
+                "description": "**RF-04** — Retorna todas las notificaciones del usuario autenticado, indicando cuáles han sido leídas y cuáles no."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"tipo\": \"avance_lista\",\n      \"mensaje\": \"Has avanzado 5 posiciones en la lista de Cardiología. Nueva posición: 7 de 84.\",\n      \"fecha\": \"2026-05-28T14:32:00Z\",\n      \"leida\": false\n    },\n    {\n      \"id\": 2,\n      \"tipo\": \"recordatorio_cita\",\n      \"mensaje\": \"Recordatorio: Tienes una cita en CESFAM Santo Domingo el 10 de marzo a las 09:00.\",\n      \"fecha\": \"2026-03-08T08:00:00Z\",\n      \"leida\": true\n    }\n  ],\n  \"no_leidas\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /notifications/:id/read — Marcar como leída",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/{{notification_id}}/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "{{notification_id}}",
+                "read"
+              ]
+            },
+            "description": "**RF-04** — Actualiza el flag `leida` a `true` para una notificación específica del usuario. El frontend actualiza el badge de notificaciones tras esta llamada."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/notifications/{{notification_id}}/read",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "notifications",
+                    "{{notification_id}}",
+                    "read"
+                  ]
+                },
+                "description": "**RF-04** — Actualiza el flag `leida` a `true` para una notificación específica del usuario. El frontend actualiza el badge de notificaciones tras esta llamada."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Notificación marcada como leída.\",\n  \"id\": 1\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/notifications/{{notification_id}}/read",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "notifications",
+                    "{{notification_id}}",
+                    "read"
+                  ]
+                },
+                "description": "**RF-04** — Actualiza el flag `leida` a `true` para una notificación específica del usuario. El frontend actualiza el badge de notificaciones tras esta llamada."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Notificación no encontrada o no pertenece al usuario.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📊 Estadísticas y KPIs",
+      "item": [
+        {
+          "name": "GET /stats — Dashboard de métricas (Funcionario)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "stats"
+              ]
+            },
+            "description": "**RF-07, RF-08** — Retorna KPIs del sistema: total de pacientes en espera, tiempo promedio global, distribución por especialidad, ocupación por centro y tendencia semanal. Solo accesible para funcionarios SOME."
+          },
+          "response": [
+            {
+              "name": "200 OK — KPIs del sistema",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/stats",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "stats"
+                  ]
+                },
+                "description": "**RF-07, RF-08** — Retorna KPIs del sistema: total de pacientes en espera, tiempo promedio global, distribución por especialidad, ocupación por centro y tendencia semanal. Solo accesible para funcionarios SOME."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"kpis\": {\n    \"total_en_espera\": 847,\n    \"tiempo_promedio_dias\": 250,\n    \"max_espera_dias\": 420,\n    \"especialidad_mas_demandada\": \"Neurología\"\n  },\n  \"por_especialidad\": [\n    { \"especialidad\": \"Neurología\", \"pacientes\": 210, \"tiempo_promedio_dias\": 420 },\n    { \"especialidad\": \"Cardiología\", \"pacientes\": 185, \"tiempo_promedio_dias\": 310 },\n    { \"especialidad\": \"Medicina General\", \"pacientes\": 320, \"tiempo_promedio_dias\": 90 }\n  ],\n  \"por_centro\": [\n    { \"centro\": \"CESFAM Santo Domingo\", \"ocupacion_porcentaje\": 87, \"total_pacientes\": 650 },\n    { \"centro\": \"Posta Rural El Convento\", \"ocupacion_porcentaje\": 62, \"total_pacientes\": 97 }\n  ],\n  \"tendencia_semanal\": [\n    { \"semana\": \"2026-W20\", \"nuevos\": 32, \"atendidos\": 18 },\n    { \"semana\": \"2026-W21\", \"nuevos\": 28, \"atendidos\": 22 }\n  ]\n}"
+            },
+            {
+              "name": "403 Forbidden — Paciente sin acceso",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/stats",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "stats"
+                  ]
+                },
+                "description": "**RF-07, RF-08** — Retorna KPIs del sistema: total de pacientes en espera, tiempo promedio global, distribución por especialidad, ocupación por centro y tendencia semanal. Solo accesible para funcionarios SOME."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Acceso denegado. Se requiere rol de funcionario.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔒 Pruebas de Seguridad",
+      "item": [
+        {
+          "name": "[ERROR] GET /auth/me sin token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Verifica que el middleware de autenticación rechace la petición si no se envía el header Authorization. Debe retornar 401."
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized esperado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/auth/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "me"
+                  ]
+                },
+                "description": "Verifica que el middleware de autenticación rechace la petición si no se envía el header Authorization. Debe retornar 401."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Token no proporcionado o expirado. Inicie sesión nuevamente.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "[ERROR] DELETE /waitlist/:id como Paciente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/waitlist/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "waitlist",
+                "1"
+              ]
+            },
+            "description": "Verifica que un paciente (token con rol=paciente) no pueda eliminar registros. Debe retornar 403. Asegurarse de que el token activo sea el de paciente (Login con 12.345.678-5)."
+          },
+          "response": [
+            {
+              "name": "403 Forbidden esperado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/waitlist/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "waitlist",
+                    "1"
+                  ]
+                },
+                "description": "Verifica que un paciente (token con rol=paciente) no pueda eliminar registros. Debe retornar 403. Asegurarse de que el token activo sea el de paciente (Login con 12.345.678-5)."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Acceso denegado. Se requiere rol de funcionario.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "[ERROR] Login con contraseña incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rut\": \"12.345.678-5\",\n  \"password\": \"contraseña_incorrecta\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Verifica que el sistema no revele si el RUT existe, retornando un mensaje genérico de error. Debe retornar 401."
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized esperado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rut\": \"12.345.678-5\",\n  \"password\": \"contraseña_incorrecta\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Verifica que el sistema no revele si el RUT existe, retornando un mensaje genérico de error. Debe retornar 401."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"RUT o contraseña incorrectos.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "[ERROR] Registro con RUT inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Test Inválido\",\n  \"rut\": \"12.345.678-9\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Pass1234!\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "RUT con dígito verificador incorrecto (9 en vez de 5). Verifica que el algoritmo de Módulo 11 rechace el registro. Debe retornar 400."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request esperado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Test Inválido\",\n  \"rut\": \"12.345.678-9\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Pass1234!\",\n  \"region\": \"Valparaíso\",\n  \"comuna\": \"Santo Domingo\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "RUT con dígito verificador incorrecto (9 en vez de 5). Verifica que el algoritmo de Módulo 11 rechace el registro. Debe retornar 400."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"error\": \"RUT inválido. El dígito verificador no corresponde.\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Casos de prueba que verifican que las rutas protegidas rechacen correctamente accesos no autorizados."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "JWT generado al hacer login. Se llena automáticamente con el script del endpoint POST /auth/login."
+    },
+    {
+      "key": "waitlist_id",
+      "value": "1"
+    },
+    {
+      "key": "notification_id",
+      "value": "1"
+    }
+  ]
+}

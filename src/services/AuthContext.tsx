@@ -42,13 +42,13 @@ const AuthContext = createContext<AuthContextType>({
   showRoleSelector: false,
   loading: false,
   error: null,
-  initiateClaveUnica: () => {},
-  handleClaveUnicaCallback: async () => {},
-  loginWithCredentials: async () => {},
-  registerPatient: async () => {},
-  selectRole: () => {},
-  setShowRoleSelector: () => {},
-  logout: () => {},
+  initiateClaveUnica: () => { },
+  handleClaveUnicaCallback: async () => { },
+  loginWithCredentials: async () => { },
+  registerPatient: async () => { },
+  selectRole: () => { },
+  setShowRoleSelector: () => { },
+  logout: () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const res = await api.get('/auth/me');
         const loggedUser = res.data;
         setUser(loggedUser);
-        
+
         // Cargar rol guardado o por defecto
         const savedRole = localStorage.getItem('saludsd_active_role') as ActiveRole;
         if (savedRole) {
@@ -94,6 +94,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     fetchMe();
+
+    // Escuchar el evento 401 del interceptor
+    const handleUnauthorized = () => {
+      setUser(null);
+      setActiveRole('paciente');
+      setShowRoleSelector(false);
+      localStorage.removeItem('saludsd_token');
+      localStorage.removeItem('saludsd_active_role');
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
   /**
@@ -104,11 +116,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const initiateClaveUnica = (isAdminFlow: boolean = false) => {
     setError(null);
     setLoading(true);
-    
+
     // Simular el redireccionamiento de ClaveÚnica al callback de nuestra app
     const code = isAdminFlow ? 'mock_admin_code' : 'mock_patient_code';
     const state = isAdminFlow ? 'mock_admin_state' : 'mock_patient_state';
-    
+
     // Redirigir a nuestro Callback
     window.location.href = `/auth/callback?code=${code}&state=${state}`;
   };
